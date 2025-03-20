@@ -1,9 +1,11 @@
 //Becas.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import clientAxios from "../../../config/clientAxios";
+import clientAxios from "../../../../config/clientAxios";
 import Swal from "sweetalert2";
-import useAuth from "../../../hooks/useAuth";
+import useAuth from "../../../../hooks/useAuth";
+import EditScholarshipInfo from "../informacionBecas/EditScholarshipInfo";
+
 
 const Becas = () => {
   const [becas, setBecas] = useState([]);
@@ -54,6 +56,8 @@ const Becas = () => {
 
   return (
     <section className="container mx-auto p-6">
+      <EditScholarshipInfo/>
+      <br />
       <h1 className="text-center text-3xl font-bold">Administrar Becas</h1>
       <Link to="/admin/add-beca" className="btn bg-blue-500 text-white p-2 rounded">Agregar Beca</Link>
       <table className="table-auto w-full border mt-4">

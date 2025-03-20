@@ -41,10 +41,10 @@ import ContextContemporaneoAdmin from "./admin/pages/contextoContemporaneo/Conte
 import OfertaEducativa from "./admin/pages/ofertaseducativas/OfertaEdtucativa.jsx";
 import AddOfertaEducativa from "./admin/pages/ofertaseducativas/AddOfertaEducativa.jsx";
 import EditOfertaEducativa from "./admin/pages/ofertaseducativas/EditOfertaEducativa.jsx";
-import Becas from "./admin/pages/beca/Becas.jsx";
-import AddBeca from "./admin/pages/beca/AddBeca.jsx";
-import EditBeca from "./admin/pages/beca/EditBeca.jsx";
-
+import Becas from "./admin/pages/becas/beca/Becas.jsx";
+import AddBeca from "./admin/pages/becas/beca/AddBeca.jsx";
+import EditBeca from "./admin/pages/becas/beca/EditBeca.jsx";
+import EditScholarshipInfo from "./admin/pages/becas/informacionBecas/EditScholarshipInfo.jsx";
 // Configuración de la empresa
 import Empresa from "./admin/pages/Empresa/Configempresa.jsx";
 
@@ -120,8 +120,9 @@ const router = createBrowserRouter([
       { path: "/admin/add-oferta", element: <AddOfertaEducativa /> },
       { path: "/admin/edit-oferta/:id", element: <EditOfertaEducativa /> },
       { path: "/admin/becas", element: <Becas /> },
-        { path: "/admin/add-beca", element: <AddBeca /> },
-        { path: "/admin/edit-beca/:id", element: <EditBeca /> },
+      { path: "/admin/add-beca", element: <AddBeca /> },
+      { path: "/admin/edit-beca/:id", element: <EditBeca /> },  
+      { path: "/admin/edit-infbeca/:id", element: <EditScholarshipInfo /> },  
       {
         path: "/admin/contexto-contemporaneo-admin",
         element: <ContextContemporaneoAdmin />,

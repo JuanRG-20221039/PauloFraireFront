@@ -1,12 +1,12 @@
 // EditBeca.jsx
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import clientAxios from "../../../config/clientAxios";
+import clientAxios from "../../../../config/clientAxios";
 import { IoIosArrowBack, IoIosAddCircle } from "react-icons/io";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { AiOutlineClose } from "react-icons/ai";
 import Swal from "sweetalert2";
-import useAuth from "../../../hooks/useAuth";
+import useAuth from "../../../../hooks/useAuth";
 
 
 const EditBeca = () => {
