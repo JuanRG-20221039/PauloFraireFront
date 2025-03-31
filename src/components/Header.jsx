@@ -27,18 +27,13 @@ const Header = () => {
     const fetchLogo = async () => {
       try {
         const { data } = await clientAxios.get("/logo");
-        setLogo(data.url || "sin logoooo"); // Fallback en caso de no haber logo
+        setLogo(data.url || "sin logo"); // Fallback en caso de no haber logo
       } catch (error) {
-        if (error.response && error.response.status === 404) {
-          // Si el logo no se encuentra, no actualizamos el estado
-          setLogo(""); // Se puede asignar una imagen por defecto o vacío
-        } else {
-          console.error("Error al obtener el logo:", error);
-        }
+        console.error(error);
       }
     };
     fetchLogo();
-    const intervalId = setInterval(fetchLogo, 10000); // Llamar a fetchLogo cada 5 segundos
+    const intervalId = setInterval(fetchLogo, 2000); // Llamar a fetchLogo cada 5 segundos
     return () => clearInterval(intervalId);
   }, []);
 
