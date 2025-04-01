@@ -50,7 +50,6 @@ const Login = () => {
     
             if (response.status === 200) {
                 const userResponse = await clientAxios.get(`/user/email/${user.email}`);
-                // const userResponse = await clientAxios.get('/error400'); // Prueba para error
                 const userData = userResponse.data;
 
                 localStorage.setItem('token', JSON.stringify(response.data.user));

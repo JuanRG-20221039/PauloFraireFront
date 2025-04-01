@@ -13,9 +13,16 @@ const AuthProvider = ({ children }) => {
         const checkUser = async () => {
             const storedToken = localStorage.getItem("token");
             if (storedToken) {
-                const parsedToken = JSON.parse(storedToken);
-                setToken(parsedToken.token);
-                setUser(parsedToken.user || null); // Asegúrate de que guardas el usuario en el token
+                try {
+                    const parsedToken = JSON.parse(storedToken);
+                    setToken(parsedToken.token);
+                    setUser(parsedToken.user || null);
+                } catch (error) {
+                    console.error('Error parsing token:', error);
+                    localStorage.removeItem("token");
+                    setToken('');
+                    setUser(null);
+                }
             }
             setLoading(false);
         };

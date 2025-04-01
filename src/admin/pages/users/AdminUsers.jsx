@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import clientAxios from '../../../config/clientAxios'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { TiEdit } from 'react-icons/ti';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { IoIosAddCircle } from 'react-icons/io';
 import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import useAuth from "../../../hooks/useAuth";
 
 const AdminUsers = () => {
+    const { token, logout } = useAuth();
     const [users, setUsers] = useState([]);
+    const navigate = useNavigate();
+
+    const config = {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        }
+    }
+
     const handleDeleteClick = async (userId) => {
         const result = await Swal.fire({
             title: '¿Estas seguro?',
@@ -22,12 +33,17 @@ const AdminUsers = () => {
 
         if (result.isConfirmed) {
             try {
-                await clientAxios.delete(`/user/${userId}`);
+                await clientAxios.delete(`/user/${userId}`, config);
                 setUsers(users.filter(user => user._id !== userId));
                 toast.success('Usuario eliminado correctamente');
             } catch (error) {
-                console.log(error);
-                toast.error('Error al eliminar el usuario');
+                if (error.response?.status === 401) {
+                    toast.error('Sesión expirada');
+                    logout();
+                } else {
+                    console.error(error);
+                    toast.error('Error al eliminar el usuario');
+                }
             }
         }
     };
@@ -35,15 +51,20 @@ const AdminUsers = () => {
     useEffect(() => {
         const getUsers = async () => {
             try {
-                const response = await clientAxios.get('/user');
+                const response = await clientAxios.get('/user', config);
                 setUsers(response.data);
             } catch (error) {
-                console.log(error);
-                toast.error('Error al cargar los usuarios');
+                if (error.response?.status === 401) {
+                    toast.error('Sesión expirada');
+                    logout();
+                } else {
+                    console.error(error);
+                    toast.error('Error al cargar los usuarios');
+                }
             }
         }
         getUsers();
-    }, [])
+    }, [token]);
 
     const roleDefault = (role) => {
         switch (parseInt(role)) {
@@ -91,7 +112,7 @@ const AdminUsers = () => {
                             {
                                 users.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="text-sm text-gray-600 mt-2">No hay Usuarios</td>
+                                        <td colSpan="5" className="text-sm text-gray-600 mt-2 text-center p-4">No hay Usuarios</td>
                                     </tr>
                                 ) : (
                                     users.map((user, index) => (
@@ -130,8 +151,6 @@ const AdminUsers = () => {
                     </table>
                 </div>
             </div>
-
-
         </section>
     )
 }
