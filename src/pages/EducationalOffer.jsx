@@ -10,22 +10,41 @@ const EducationalOffer = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchOffers = async () => {
       try {
-        const response = await clientAxios.get("/getoffter");
-        setOffers(response.data);
-      } catch (error) {
-        setError("Error al cargar las ofertas educativas");
+        const { data } = await clientAxios.get("/getoffter");
+        if (isMounted) setOffers(data);
+      } catch (err) {
+        if (isMounted) setError(err.message || "Error al cargar las ofertas educativas");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchOffers();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  if (loading) return <div>Cargando ofertas educativas...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <span className="animate-pulse text-gray-500">Cargando ofertas...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-600">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <section className="my-20 container mx-auto">

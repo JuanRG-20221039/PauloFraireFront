@@ -6,23 +6,45 @@ import clientAxios from "../config/clientAxios";
 const CallsEducational = () => {
   const [becas, setBecas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const breadcrumbs = ["Convocatorias"];
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchBecas = async () => {
       try {
         const response = await clientAxios.get("/getbecas");
-        setBecas(response.data);
-      } catch (error) {
-        console.error("Error al obtener becas:", error);
+        if (isMounted) setBecas(response.data);
+      } catch (err) {
+        if (isMounted) setError("Error al obtener becas");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
+
     fetchBecas();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  if (loading) return <p className="text-center py-5">Cargando becas...</p>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <span className="animate-pulse text-gray-500">Cargando becas...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-600">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -40,29 +62,29 @@ const CallsEducational = () => {
           {becas.map((beca, index) => (
             <div
               key={beca._id}
-              className={`pt-20 pb-16 p-4 ${index % 2 === 0 ? "bg-gradient-to-tr from-indigo-500 to-purple-600" : "bg-gradient-to-br from-pink-400 to-rose-600"}`}
+              className={`pt-20 pb-16 p-4 ${
+                index % 2 === 0
+                  ? "bg-gradient-to-tr from-indigo-500 to-purple-600"
+                  : "bg-gradient-to-br from-pink-400 to-rose-600"
+              }`}
             >
               <div className="flex flex-wrap gap-4">
                 {index % 2 !== 0 && (
                   <div className="flex-1 basis-[20rem]">
-                    <div className="relative">
-                      <img
-                        src={beca.imageUrl}
-                        alt={beca.title}
-                        className="rounded-lg w-full sm:h-full object-cover object-center"
-                      />
-                    </div>
+                    <img
+                      src={beca.imageUrl}
+                      alt={beca.title}
+                      className="rounded-lg w-full sm:h-full object-cover object-center"
+                    />
                   </div>
                 )}
 
                 <div className="flex-1 basis-[18rem] text-white">
-                  <h1 className="mb-2 text-4xl font-bold tracking-tight text-gray-800 dark:text-white">
+                  <h2 className="mb-2 text-4xl font-bold tracking-tight text-gray-800 dark:text-white">
                     {beca.title}
-                  </h1>
+                  </h2>
                   <p className="mt-3">{beca.description}</p>
 
-                  {/* Mostrar requisitos con icono FiCheck */}
-                  {/* Mostrar requisitos con icono FiCheck en color naranja */}
                   {beca.requisitos && (
                     <div className="mt-4">
                       <ul className="mt-2 ml-5">
@@ -78,7 +100,6 @@ const CallsEducational = () => {
                     </div>
                   )}
 
-                  {/* Mostrar PDFs solo con puntos */}
                   <div className="mt-4">
                     <ul className="mt-2 ml-5 list-disc">
                       {beca.pdfs.map((pdf, i) => (
@@ -90,7 +111,7 @@ const CallsEducational = () => {
                   {beca.pdfs.length > 0 && (
                     <a
                       href={beca.pdfs[0].url}
-                      className="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 hover:cursor-pointer"
+                      className="inline-block mt-4 bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 hover:underline"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -101,13 +122,11 @@ const CallsEducational = () => {
 
                 {index % 2 === 0 && (
                   <div className="flex-1 basis-[20rem]">
-                    <div className="relative">
-                      <img
-                        src={beca.imageUrl}
-                        alt={beca.title}
-                        className="rounded-lg w-full sm:h-[400px] object-cover"
-                      />
-                    </div>
+                    <img
+                      src={beca.imageUrl}
+                      alt={beca.title}
+                      className="rounded-lg w-full sm:h-[400px] object-cover"
+                    />
                   </div>
                 )}
               </div>
