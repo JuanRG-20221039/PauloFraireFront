@@ -12,6 +12,7 @@ const CreateEducationalOffer = () => {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
   const [pdfs, setPdfs] = useState([]);
+  const [maxCapacity, setMaxCapacity] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
@@ -54,6 +55,7 @@ const CreateEducationalOffer = () => {
     setDescription("");
     setImage(null);
     setPdfs([]);
+    setMaxCapacity(30);
     setIsLoading(false);
     setUploadProgress(0);
   };
@@ -71,6 +73,7 @@ const CreateEducationalOffer = () => {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("image", image);
+    formData.append("maxCapacity", maxCapacity);
     pdfs.forEach((pdf) => formData.append("pdfs", pdf));
 
     try {
@@ -124,6 +127,19 @@ const CreateEducationalOffer = () => {
               placeholder="Ingrese una descripción detallada"
               className="w-full p-2 border rounded-lg"
             />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold">Cupo Máximo:</label>
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={maxCapacity}
+              onChange={(e) => setMaxCapacity(parseInt(e.target.value))}
+              placeholder="Ingrese el cupo máximo de alumnos"
+              className="w-full p-2 border rounded-lg"
+            />
+            <p className="text-xs text-gray-500 mt-1">Número máximo de alumnos que pueden inscribirse</p>
           </div>
           <div>
             <label className="block text-gray-700 font-semibold">Imagen:</label>

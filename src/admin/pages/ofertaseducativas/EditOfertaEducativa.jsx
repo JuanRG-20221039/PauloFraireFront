@@ -15,6 +15,7 @@ const EditEducationalOffer = () => {
   const [image, setImage] = useState(null);
   const [existingPdfs, setExistingPdfs] = useState([]);
   const [pdfs, setPdfs] = useState([]);
+  const [maxCapacity, setMaxCapacity] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const EditEducationalOffer = () => {
         setDescription(data.description);
         setCurrentImage(data.imageUrl);
         setExistingPdfs(data.pdfs);
+        setMaxCapacity(data.maxCapacity || 30);
       } catch (error) {
         Swal.fire("Error", "No se pudo cargar la oferta educativa", "error");
       }
@@ -97,7 +99,8 @@ const EditEducationalOffer = () => {
       !title ||
       !description ||
       (!currentImage && !image) ||
-      (existingPdfs.length === 0 && pdfs.length === 0)
+      (existingPdfs.length === 0 && pdfs.length === 0) ||
+      !maxCapacity
     ) {
       Swal.fire("Error", "Todos los campos son obligatorios", "error");
       return;
@@ -108,6 +111,7 @@ const EditEducationalOffer = () => {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
+    formData.append("maxCapacity", maxCapacity);
 
     // Si hay una nueva imagen, agregarla al formData
     if (image) {
@@ -171,6 +175,16 @@ const EditEducationalOffer = () => {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-2 border rounded-lg"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold">Cupo Máximo:</label>
+            <input
+              type="number"
+              min="1"
+              value={maxCapacity}
+              onChange={(e) => setMaxCapacity(Number(e.target.value))}
               className="w-full p-2 border rounded-lg"
             />
           </div>
