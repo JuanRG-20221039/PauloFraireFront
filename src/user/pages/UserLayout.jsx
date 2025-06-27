@@ -6,8 +6,7 @@ export default function UserLayout() {
   return (
     <div>
       <Header/>
-      <h1>USER LAYOUT</h1>
-      <UserProfile/>
+      {/* <UserProfile/> */}
     </div>
   )
 }

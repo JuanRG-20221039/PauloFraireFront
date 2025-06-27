@@ -44,7 +44,6 @@ const adminNavItems = [
     icon: <AiFillDollarCircle className="text-2xl" />,
     label: "Becas",
   },
-
   {
     to: "/admin/about",
     icon: <FaBook className="text-2xl" />,
@@ -112,7 +111,7 @@ const SideBar = () => {
                 <NavLink
                   className={({ isActive }) =>
                     `flex items-center gap-2 w-full ${
-                      isActive ? "bg-red-500 text-white" : "text-[#413f44]"
+                      isActive ? "bg-yellow-400 text-black" : "text-[#413f44]"
                     } duration-150 rounded-md p-2 cursor-pointer hover:bg-Teal hover:text-white font-bold text-sm`
                   }
                   to={item.to}
@@ -128,7 +127,7 @@ const SideBar = () => {
                   {open && (
                     <button
                       onClick={(e) => {
-                        e.preventDefault(); // Evita que se active la navegación
+                        e.preventDefault();
                         setAboutOpen(!aboutOpen);
                       }}
                       className="p-2 focus:outline-none"
@@ -146,7 +145,7 @@ const SideBar = () => {
               <NavLink
                 className={({ isActive }) =>
                   `flex items-center gap-2 ${
-                    isActive ? "bg-red-500 text-white" : "text-[#413f44]"
+                    isActive ? "bg-yellow-400 text-black" : "text-[#413f44]"
                   } duration-150 rounded-md p-2 cursor-pointer hover:bg-Teal hover:text-white font-bold text-sm`
                 }
                 to={item.to}
@@ -158,7 +157,6 @@ const SideBar = () => {
               </NavLink>
             )}
 
-            {/* Submenú de "Acerca de" solo se muestra si la barra está abierta */}
             {item.subItems && aboutOpen && open && (
               <ul className="ml-6">
                 {item.subItems.map((subItem, subIndex) => (
@@ -166,13 +164,17 @@ const SideBar = () => {
                     <NavLink
                       className={({ isActive }) =>
                         `flex items-center gap-2 ${
-                          isActive ? "bg-red-500 text-white" : "text-[#413f44]"
+                          isActive
+                            ? "bg-yellow-400 text-black"
+                            : "text-[#413f44]"
                         } duration-150 rounded-md p-2 cursor-pointer hover:bg-Teal hover:text-white font-bold text-sm`
                       }
                       to={subItem.to}
                     >
                       <span
-                        className={`${!open ? "hidden" : "block"} duration-200`}
+                        className={`${
+                          !open ? "hidden" : "block"
+                        } duration-200`}
                       >
                         {subItem.label}
                       </span>
@@ -183,9 +185,11 @@ const SideBar = () => {
             )}
           </li>
         ))}
+
+        {/* Cerrar sesión */}
         <li className="space-y-2">
           <button
-            className="flex items-center gap-2 duration-150 rounded-md p-2 cursor-pointer hover:bg-Teal hover:text-white font-bold text-sm"
+            className="flex items-center gap-2 bg-red-500 text-white hover:bg-red-600 duration-150 rounded-md p-2 cursor-pointer font-bold text-sm"
             onClick={handleSubmit}
           >
             <TbLogin className="text-2xl" />

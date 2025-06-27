@@ -1,23 +1,62 @@
-import React from 'react';
-import Galery from '../components/home/Galery';
-import Breadcrumbs from '../components/navbar/Breadcrumbs';
+import React, { Suspense, lazy } from "react";
+import Breadcrumbs from "../components/navbar/Breadcrumbs";
 
-const AcademyActivities = () => {
+// Lazy load de la galería para optimizar bundle
+const Galery = lazy(() => import("../components/home/Galery"));
 
-    const breadcrumbs = ['Actividades Academicas'];
+// Error Boundary para capturar errores en Galery
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-    return (
-        <div>
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
 
-            <div className='flex m-10'>
-                <Breadcrumbs breadcrumbs={breadcrumbs} />
-            </div>
+  componentDidCatch(error, info) {
+    console.error("Error en Galery:", error, info);
+  }
 
-            <h1 className="font-extrabold text-4xl text-center uppercase my-10 text-gray-700">Actividades Académicas</h1>
-            <Galery />
-
-        </div>
-    )
+  render() {
+    if (this.state.hasError) {
+      return (
+        <p className="text-red-600 text-center py-10">
+          Error cargando actividades académicas.
+        </p>
+      );
+    }
+    return this.props.children;
+  }
 }
 
-export default AcademyActivities
+const AcademyActivities = () => {
+  const breadcrumbs = ["Actividades Académicas"];
+
+  return (
+    <div>
+      <div className="flex m-10">
+        <Breadcrumbs breadcrumbs={breadcrumbs} />
+      </div>
+
+      <h1 className="font-extrabold text-4xl text-center uppercase my-10 text-gray-700">
+        Actividades Académicas
+      </h1>
+
+      <ErrorBoundary>
+        <Suspense
+          fallback={
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-300" />
+            </div>
+          }
+        >
+          <Galery />
+        </Suspense>
+      </ErrorBoundary>
+    </div>
+  );
+};
+
+export default AcademyActivities;

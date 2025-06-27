@@ -12,6 +12,7 @@ const CreateEducationalOffer = () => {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
   const [pdfs, setPdfs] = useState([]);
+  const [maxCapacity, setMaxCapacity] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
@@ -54,36 +55,52 @@ const CreateEducationalOffer = () => {
     setDescription("");
     setImage(null);
     setPdfs([]);
+    setMaxCapacity(30);
     setIsLoading(false);
     setUploadProgress(0);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title || !description || !image || pdfs.length === 0) {
-      Swal.fire("Error", "Todos los campos son obligatorios", "error");
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!title || !description || !image || pdfs.length === 0) {
+    Swal.fire("Error", "Todos los campos son obligatorios", "error");
+    return;
+  }
 
-    setIsLoading(true);
+  // Validar tamaño de los PDFs (máximo 10 MB cada uno)
+  const maxPdfSize = 10 * 1024 * 1024; // 10 MB en bytes
+  const oversizedFiles = pdfs.filter((pdf) => pdf.size > maxPdfSize);
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("image", image);
-    pdfs.forEach((pdf) => formData.append("pdfs", pdf));
+  if (oversizedFiles.length > 0) {
+    const fileNames = oversizedFiles.map((f) => f.name).join(", ");
+    Swal.fire(
+      "Archivo demasiado grande",
+      `Los siguientes archivos superan el límite de 10 MB:\n${fileNames}`,
+      "error"
+    );
+    return;
+  }
 
-    try {
-      await clientAxios.post("/createoffter", formData, config);
-      Swal.fire("Éxito", "Oferta educativa creada correctamente", "success");
-      resetForm();
-      navigate("/admin/ofertaeducativa");
-    } catch (error) {
-      console.error(error);
-      Swal.fire("Error", "Hubo un problema al crear la oferta", "error");
-      setIsLoading(false);
-    }
-  };
+  setIsLoading(true);
+
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("image", image);
+  formData.append("maxCapacity", maxCapacity);
+  pdfs.forEach((pdf) => formData.append("pdfs", pdf));
+
+  try {
+    await clientAxios.post("/createoffter", formData, config);
+    Swal.fire("Éxito", "Oferta educativa creada correctamente", "success");
+    resetForm();
+    navigate("/admin/ofertaeducativa");
+  } catch (error) {
+    console.error(error);
+    Swal.fire("Error", "Hubo un problema al crear la oferta", "error");
+    setIsLoading(false);
+  }
+};
 
   return (
     <section className="container mx-auto bg-slate-50 p-6 min-h-screen flex flex-col justify-center items-center">
@@ -124,6 +141,19 @@ const CreateEducationalOffer = () => {
               placeholder="Ingrese una descripción detallada"
               className="w-full p-2 border rounded-lg"
             />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold">Cupo Máximo:</label>
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={maxCapacity}
+              onChange={(e) => setMaxCapacity(parseInt(e.target.value))}
+              placeholder="Ingrese el cupo máximo de alumnos"
+              className="w-full p-2 border rounded-lg"
+            />
+            <p className="text-xs text-gray-500 mt-1">Número máximo de alumnos que pueden inscribirse</p>
           </div>
           <div>
             <label className="block text-gray-700 font-semibold">Imagen:</label>

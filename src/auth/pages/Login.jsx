@@ -63,9 +63,22 @@ const Login = () => {
                 }
             }
         } catch (error) {
-            setError(error); // Establece el error para que el ErrorHandler lo maneje
+            // Extrae un mensaje legible del error
+            let mensaje = "Ocurrió un error inesperado";
+            if (error.response && error.response.data) {
+                if (typeof error.response.data === "string") {
+                    mensaje = error.response.data;
+                } else if (error.response.data.message) {
+                    mensaje = error.response.data.message;
+                } else if (error.response.data.msg) {
+                    mensaje = error.response.data.msg;
+                }
+            } else if (error.message) {
+                mensaje = error.message;
+            }
+            setError({ message: mensaje, status: error.response?.status }); // Solo pasa info legible
             console.log(error);
-            toast.error(error.response.data);
+            toast.error(mensaje);
         } finally {
             setLoading(false);
             setCaptchaValue(null); // Reinicia el valor del captcha

@@ -15,6 +15,7 @@ const EditEducationalOffer = () => {
   const [image, setImage] = useState(null);
   const [existingPdfs, setExistingPdfs] = useState([]);
   const [pdfs, setPdfs] = useState([]);
+  const [maxCapacity, setMaxCapacity] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const EditEducationalOffer = () => {
         setDescription(data.description);
         setCurrentImage(data.imageUrl);
         setExistingPdfs(data.pdfs);
+        setMaxCapacity(data.maxCapacity || 30);
       } catch (error) {
         Swal.fire("Error", "No se pudo cargar la oferta educativa", "error");
       }
@@ -89,52 +91,62 @@ const EditEducationalOffer = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // Validar campos obligatorios
-    if (
-      !title ||
-      !description ||
-      (!currentImage && !image) ||
-      (existingPdfs.length === 0 && pdfs.length === 0)
-    ) {
-      Swal.fire("Error", "Todos los campos son obligatorios", "error");
-      return;
-    }
+  // Validar campos obligatorios
+  if (
+    !title ||
+    !description ||
+    (!currentImage && !image) ||
+    (existingPdfs.length === 0 && pdfs.length === 0) ||
+    !maxCapacity
+  ) {
+    Swal.fire("Error", "Todos los campos son obligatorios", "error");
+    return;
+  }
 
-    setIsLoading(true);
+  // Validar tamaño de los nuevos PDFs (máximo 10 MB por archivo)
+  const maxPdfSize = 10 * 1024 * 1024; // 10 MB
+  const oversizedFiles = pdfs.filter((pdf) => pdf.size > maxPdfSize);
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
+  if (oversizedFiles.length > 0) {
+    const fileNames = oversizedFiles.map((f) => f.name).join(", ");
+    Swal.fire(
+      "Archivo demasiado grande",
+      `Los siguientes archivos superan el límite de 10 MB:\n${fileNames}`,
+      "error"
+    );
+    return;
+  }
 
-    // Si hay una nueva imagen, agregarla al formData
-    if (image) {
-      formData.append("image", image);
-    } else if (currentImage) {
-      // Si no hay nueva imagen, mantener la imagen existente
-      formData.append("imageUrl", currentImage);
-    }
+  setIsLoading(true);
 
-    // Agregar PDFs existentes y nuevos
-    existingPdfs.forEach((pdf) => formData.append("existingPdfs", pdf.url));
-    pdfs.forEach((pdf) => formData.append("pdfs", pdf));
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("maxCapacity", maxCapacity);
 
-    try {
-      await clientAxios.put(`/updateEducationalOffer/${id}`, formData, config);
-      Swal.fire(
-        "Éxito",
-        "Oferta educativa actualizada correctamente",
-        "success"
-      );
-      navigate("/admin/ofertaeducativa");
-    } catch (error) {
-      Swal.fire("Error", "Hubo un problema al actualizar la oferta", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (image) {
+    formData.append("image", image);
+  } else if (currentImage) {
+    formData.append("imageUrl", currentImage);
+  }
+
+  existingPdfs.forEach((pdf) => formData.append("existingPdfs", pdf.url));
+  pdfs.forEach((pdf) => formData.append("pdfs", pdf));
+
+  try {
+    await clientAxios.put(`/updateEducationalOffer/${id}`, formData, config);
+    Swal.fire("Éxito", "Oferta educativa actualizada correctamente", "success");
+    navigate("/admin/ofertaeducativa");
+  } catch (error) {
+    console.error(error);
+    Swal.fire("Error", "Hubo un problema al actualizar la oferta", "error");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <section className="container mx-auto bg-slate-50 p-6 min-h-screen flex flex-col justify-center items-center">
@@ -171,6 +183,16 @@ const EditEducationalOffer = () => {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-2 border rounded-lg"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold">Cupo Máximo:</label>
+            <input
+              type="number"
+              min="1"
+              value={maxCapacity}
+              onChange={(e) => setMaxCapacity(Number(e.target.value))}
               className="w-full p-2 border rounded-lg"
             />
           </div>
