@@ -60,33 +60,47 @@ const CreateEducationalOffer = () => {
     setUploadProgress(0);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title || !description || !image || pdfs.length === 0) {
-      Swal.fire("Error", "Todos los campos son obligatorios", "error");
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!title || !description || !image || pdfs.length === 0) {
+    Swal.fire("Error", "Todos los campos son obligatorios", "error");
+    return;
+  }
 
-    setIsLoading(true);
+  // Validar tamaño de los PDFs (máximo 10 MB cada uno)
+  const maxPdfSize = 10 * 1024 * 1024; // 10 MB en bytes
+  const oversizedFiles = pdfs.filter((pdf) => pdf.size > maxPdfSize);
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("image", image);
-    formData.append("maxCapacity", maxCapacity);
-    pdfs.forEach((pdf) => formData.append("pdfs", pdf));
+  if (oversizedFiles.length > 0) {
+    const fileNames = oversizedFiles.map((f) => f.name).join(", ");
+    Swal.fire(
+      "Archivo demasiado grande",
+      `Los siguientes archivos superan el límite de 10 MB:\n${fileNames}`,
+      "error"
+    );
+    return;
+  }
 
-    try {
-      await clientAxios.post("/createoffter", formData, config);
-      Swal.fire("Éxito", "Oferta educativa creada correctamente", "success");
-      resetForm();
-      navigate("/admin/ofertaeducativa");
-    } catch (error) {
-      console.error(error);
-      Swal.fire("Error", "Hubo un problema al crear la oferta", "error");
-      setIsLoading(false);
-    }
-  };
+  setIsLoading(true);
+
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("image", image);
+  formData.append("maxCapacity", maxCapacity);
+  pdfs.forEach((pdf) => formData.append("pdfs", pdf));
+
+  try {
+    await clientAxios.post("/createoffter", formData, config);
+    Swal.fire("Éxito", "Oferta educativa creada correctamente", "success");
+    resetForm();
+    navigate("/admin/ofertaeducativa");
+  } catch (error) {
+    console.error(error);
+    Swal.fire("Error", "Hubo un problema al crear la oferta", "error");
+    setIsLoading(false);
+  }
+};
 
   return (
     <section className="container mx-auto bg-slate-50 p-6 min-h-screen flex flex-col justify-center items-center">

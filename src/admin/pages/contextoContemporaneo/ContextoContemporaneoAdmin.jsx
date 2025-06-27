@@ -550,9 +550,11 @@ export default function ContextoContemporaneoAdmin() {
             onClick={() => addArrayField('Ppdfs')}
             className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 flex items-center gap-2"
           >
-            <FaPlus /> Agregar PDF Premium
+            <FaPlus /> Agregar PDF con imagen
           </button>
         </div>
+        <hr></hr>
+        <br></br>
 
         {!loading ? (
           <div className="flex gap-4">
@@ -566,9 +568,9 @@ export default function ContextoContemporaneoAdmin() {
             <button
               type="button"
               onClick={handlePdfSubmit}
-              className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 font-medium flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200 font-medium flex items-center justify-center gap-2"
             >
-              <FaPlus /> Subir PDFs
+              <FaPlus /> Subir todos los PDFs
             </button>
           </div>
         ) : (
