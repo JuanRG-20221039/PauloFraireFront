@@ -134,7 +134,7 @@ const EditEducationalOffer = () => {
       );
       navigate("/admin/ofertaeducativa");
     } catch (error) {
-      Swal.fire("Error", "Hubo un problema al actualizar la oferta", "error");
+      Swal.fire("Error", "Hubo un problema al actualizar la oferta (Tamaño maximo de los pdf - 10mb)");
     } finally {
       setIsLoading(false);
     }
