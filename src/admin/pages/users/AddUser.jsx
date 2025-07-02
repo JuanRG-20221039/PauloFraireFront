@@ -92,7 +92,8 @@ const AddUser = () => {
                 }
 
                 // Password validation
-                const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/;
+                const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~]{8,}$/;
+
                 if (!passwordRegex.test(user.password)) {
                     toast.error('La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial');
                     setLoading(false);
