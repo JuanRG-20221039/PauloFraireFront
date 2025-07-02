@@ -182,7 +182,6 @@ const UserProfile = () => {
             }
             
             const parsedToken = JSON.parse(storedToken);
-            console.log('Token parseado:', parsedToken); // Debug
             
             // Corregir la ruta para que incluya el prefijo 'offer'
             const response = await clientAxios.get('/available', {
@@ -191,11 +190,8 @@ const UserProfile = () => {
                 }
             });
             
-            console.log('Respuesta completa de ofertas:', response); // Debug
-            console.log('Datos de ofertas educativas:', response.data); // Debug
             
             if (!response.data || response.data.length === 0) {
-                console.log('No se encontraron ofertas educativas'); // Debug
                 setEducationalOffers([]);
                 return;
             }
@@ -210,7 +206,6 @@ const UserProfile = () => {
                 imageUrl: offer.imageUrl
             }));
             
-            console.log('Ofertas validadas:', validOffers); // Debug
             setEducationalOffers(validOffers);
         } catch (error) {
             console.error('Error detallado al obtener ofertas educativas:', error);
@@ -234,7 +229,6 @@ const UserProfile = () => {
             }
             
             const parsedToken = JSON.parse(storedToken);
-            console.log('Intentando inscribir en oferta:', offerId); // Debug
             
             // Corregir la ruta eliminando el prefijo '/api' ya que clientAxios ya lo incluye en baseURL
             const response = await clientAxios.post(`/enroll/${offerId}`, {}, {
@@ -244,7 +238,6 @@ const UserProfile = () => {
                 }
             });
             
-            console.log('Respuesta de inscripción:', response.data); // Debug
             setSelectedOfferId(offerId);
             Swal.fire("Éxito", "Oferta educativa seleccionada correctamente", "success");
             await fetchUserData();
@@ -267,8 +260,6 @@ const UserProfile = () => {
             }
             
             const parsedToken = JSON.parse(storedToken);
-            console.log('Intentando desinscribir de oferta:', userData.selectedEducationalOffer); // Debug
-            
             const response = await clientAxios.post(`/unenroll/${userData.selectedEducationalOffer}`, {}, {
                 headers: {
                     'Authorization': `Bearer ${parsedToken.token}`,
@@ -276,7 +267,6 @@ const UserProfile = () => {
                 }
             });
             
-            console.log('Respuesta de desinscripción:', response.data); // Debug
             setSelectedOfferId('');
             Swal.fire("Éxito", "Se ha cancelado la selección de oferta educativa", "success");
             await fetchUserData();

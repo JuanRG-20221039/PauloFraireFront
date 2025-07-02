@@ -28,65 +28,68 @@ const Login = () => {
         setCaptchaValue(value);
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-    
-        if (!captchaValue) {
-            toast.error('Por favor verifica que no eres un robot.');
-            return;
-        }
-    
-        if (user.email.trim() === '' || user.password.trim() === '') {
-            toast.error('No puede haber campos vacíos');
-            return;
-        }
-    
-        setLoading(true);
-        try {
-            const response = await clientAxios.post('/login', { 
-                ...user, 
-                captcha: captchaValue 
-            });
-    
-            if (response.status === 200) {
-                const userResponse = await clientAxios.get(`/user/email/${user.email}`);
-                const userData = userResponse.data;
+const handleSubmit = async (e) => {
+    e.preventDefault();
 
-                localStorage.setItem('token', JSON.stringify(response.data.user));
+    if (!captchaValue) {
+        toast.error('Por favor verifica que no eres un robot.');
+        return;
+    }
 
-                if (userData.role === 0) {
-                    navigate('/user/profile');
-                } else if (userData.role === 1) {
-                    navigate('/admin/home');
-                } else {
-                    toast.error('Rol desconocido. Contacta al administrador.');
-                }
-            }
-        } catch (error) {
-            // Extrae un mensaje legible del error
-            let mensaje = "Ocurrió un error inesperado";
-            if (error.response && error.response.data) {
-                if (typeof error.response.data === "string") {
-                    mensaje = error.response.data;
-                } else if (error.response.data.message) {
-                    mensaje = error.response.data.message;
-                } else if (error.response.data.msg) {
-                    mensaje = error.response.data.msg;
-                }
-            } else if (error.message) {
-                mensaje = error.message;
-            }
-            setError({ message: mensaje, status: error.response?.status }); // Solo pasa info legible
-            console.log(error);
-            toast.error(mensaje);
-        } finally {
-            setLoading(false);
-            setCaptchaValue(null); // Reinicia el valor del captcha
-            if (captchaRef.current) {
-                captchaRef.current.reset(); // Reinicia el captcha visualmente
+    if (user.email.trim() === '' || user.password.trim() === '') {
+        toast.error('No puede haber campos vacíos');
+        return;
+    }
+
+    const cleanUser = {
+        email: user.email.trim(),
+        password: user.password.trim()
+    };
+
+    setLoading(true);
+    try {
+        const response = await clientAxios.post('/login', { 
+            ...cleanUser, 
+            captcha: captchaValue 
+        });
+
+        if (response.status === 200) {
+            const userResponse = await clientAxios.get(`/user/email/${cleanUser.email}`);
+            const userData = userResponse.data;
+
+            localStorage.setItem('token', JSON.stringify(response.data.user));
+
+            if (userData.role === 0) {
+                navigate('/user/profile');
+            } else if (userData.role === 1) {
+                navigate('/admin/home');
+            } else {
+                toast.error('Rol desconocido. Contacta al administrador.');
             }
         }
-    };      
+    } catch (error) {
+        let mensaje = "Ocurrió un error inesperado";
+        if (error.response && error.response.data) {
+            if (typeof error.response.data === "string") {
+                mensaje = error.response.data;
+            } else if (error.response.data.message) {
+                mensaje = error.response.data.message;
+            } else if (error.response.data.msg) {
+                mensaje = error.response.data.msg;
+            }
+        } else if (error.message) {
+            mensaje = error.message;
+        }
+        setError({ message: mensaje, status: error.response?.status });
+        toast.error(mensaje);
+    } finally {
+        setLoading(false);
+        setCaptchaValue(null);
+        if (captchaRef.current) {
+            captchaRef.current.reset();
+        }
+    }
+};
 
     const updateState = (e) => {
         setUser({

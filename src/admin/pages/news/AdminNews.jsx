@@ -25,7 +25,6 @@ const AdminNews = () => {
         const getBlogs = async () => {
             try {
                 const response = await clientAxios.get('/blog', config);
-                console.log(response);
                 setBlogs(response.data);
                 setLoading(false);
             } catch (error) {
