@@ -178,25 +178,18 @@ export default function ContextoContemporaneoAdmin() {
       };
       let contextResponse;
       if (editingId) {
-        // DEBUG:
-        // console.log("Actualizando contexto con ID:", editingId, formData);
         contextResponse = await clientAxios.put(
           `/contexto-contemporaneo/${editingId}`,
           formData,
           contextConfig
         );
       } else {
-        // DEBUG:
-        // console.log("Creando nuevo contexto:", formData);
         contextResponse = await clientAxios.post(
           '/contexto-contemporaneo',
           formData,
           contextConfig
         );
       }
-      // DEBUG:
-      // console.log("Respuesta del servidor al guardar contexto:", contextResponse.data);
-
       toast.success(editingId ? 'Contenido actualizado exitosamente' : 'Contenido creado exitosamente');
       await fetchContextos();
     } catch (error) {
@@ -215,10 +208,6 @@ export default function ContextoContemporaneoAdmin() {
   const handlePdfSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    // DEBUG:
-    // console.log("Iniciando subida de PDFs...");
-    // console.log("pdfData actual:", pdfData);
 
     try {
       // Función para validar que los campos requeridos estén presentes
@@ -244,12 +233,8 @@ export default function ContextoContemporaneoAdmin() {
       // Función para subir los PDFs
       const uploadPdfs = async (pdfs, isPremium = false) => {
         for (const pdf of pdfs) {
-          // DEBUG:
-          // console.log("Procesando PDF:", pdf);
 
           if (!pdf.nombre?.trim() || !pdf.archivo) {
-            // DEBUG:
-            // console.log("Saltando PDF vacío o sin archivo:", pdf);
             continue;
           }
 
@@ -263,8 +248,6 @@ export default function ContextoContemporaneoAdmin() {
             formData.append('archivo', pdf.archivo);
             formData.append('tipo', isPremium ? '1' : '0');
 
-            // DEBUG:
-            // console.log("Creando FormData para el PDF:", pdf.nombre);
             if (isPremium && pdf.imagen instanceof File) {
               if (!pdf.imagen.type.startsWith('image/')) {
                 throw new Error('El archivo de imagen debe ser una imagen válida');
@@ -272,9 +255,7 @@ export default function ContextoContemporaneoAdmin() {
               formData.append('imagen', pdf.imagen);
             }
 
-            // DEBUG: ver qué contiene el FormData
             for (let pair of formData.entries()) {
-              // console.log('FormData entry:', pair[0], pair[1]);
             }
 
             const pdfConfig = {
@@ -284,11 +265,7 @@ export default function ContextoContemporaneoAdmin() {
               },
             };
 
-            // DEBUG:
-            // console.log("Enviando PDF al backend (POST /pdfs-cc)...");
-
             const response = await clientAxios.post('/pdfs-cc', formData, pdfConfig);
-            // console.log('PDF uploaded successfully:', response.data);
           } catch (error) {
             console.error('PDF upload failed:', error.response?.data || error.message);
             throw error;
@@ -296,10 +273,7 @@ export default function ContextoContemporaneoAdmin() {
         }
       };
 
-      // Subir PDFs básicos y premium secuencialmente
-      // console.log("Subiendo PDFs básicos...");
       await uploadPdfs(pdfData.pdfs.filter(pdf => pdf.nombre && pdf.archivo));
-      // console.log("Subiendo PDFs premium...");
       await uploadPdfs(pdfData.Ppdfs.filter(pdf => pdf.nombre && pdf.archivo), true);
 
       toast.success('PDFs subidos exitosamente');

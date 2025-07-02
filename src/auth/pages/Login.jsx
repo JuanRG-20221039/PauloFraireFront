@@ -48,8 +48,6 @@ const handleSubmit = async (e) => {
 
     setLoading(true);
     try {
-        // console.log("Enviando login:", { ...cleanUser, captcha: captchaValue });
-
         const response = await clientAxios.post('/login', { 
             ...cleanUser, 
             captcha: captchaValue 
@@ -83,7 +81,6 @@ const handleSubmit = async (e) => {
             mensaje = error.message;
         }
         setError({ message: mensaje, status: error.response?.status });
-        // console.log(error);
         toast.error(mensaje);
     } finally {
         setLoading(false);
