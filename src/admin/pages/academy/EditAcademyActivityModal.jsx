@@ -54,7 +54,6 @@ const EditAcademyActivityModal = ({ openEdit, setOpenEdit, id }) => {
 
         try {
             const response = await clientAxios.put(`/academy-activities/${id}`, academyActivity, config);
-            console.log(response);
             setLoading(false);
             if (response.status === 200) {
                 toast.success('Actualizado Correctamente');

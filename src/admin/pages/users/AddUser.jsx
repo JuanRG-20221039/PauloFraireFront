@@ -44,132 +44,110 @@ const AddUser = () => {
     }
   }, [userId]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      // Validar campos requeridos
-      const requiredFields = userId
-        ? ["name", "lastName", "email", "role"]
-        : ["name", "lastName", "email", "password", "role"];
+  try {
+    // Validar campos requeridos
+    const requiredFields = userId
+      ? ["name", "lastName", "email", "role"]
+      : ["name", "lastName", "email", "password", "role"];
 
-      const missingFields = requiredFields.filter((field) => {
-        const value = user[field];
-        if (value === undefined || value === null || value === "") return true;
-        if (typeof value === "string") return !value.trim();
-        return false;
+    const missingFields = requiredFields.filter((field) => {
+      const value = user[field];
+      if (value === undefined || value === null || value === "") return true;
+      if (typeof value === "string") return !value.trim();
+      return false;
+    });
+
+    if (missingFields.length > 0) {
+      toast.error("Todos los campos son obligatorios");
+      setLoading(false);
+      return;
+    }
+
+    if (!userId && !password2) {
+      toast.error("Debe confirmar la contraseña");
+      setLoading(false);
+      return;
+    }
+
+    if (!userId) {
+      // Verificar si el correo ya existe
+      try {
+        const emailCheck = await clientAxios.get(`/user/email/${user.email}`);
+        if (emailCheck.data) {
+          toast.error("Ya existe un usuario con este correo electrónico");
+          setLoading(false);
+          return;
+        }
+      } catch (error) {
+        if (error.response && error.response.status !== 404) {
+          toast.error("Error al verificar el correo electrónico");
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Validación de la contraseña
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~]{8,}$/;
+
+      if (!passwordRegex.test(user.password)) {
+        toast.error(
+          "La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial"
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (user.password !== password2) {
+        toast.error("Las contraseñas no coinciden");
+        setLoading(false);
+        return;
+      }
+    }
+
+    let response;
+    if (userId) {
+      // Obtener solo los campos modificados
+      const modifiedFields = {};
+      Object.keys(user).forEach((key) => {
+        if (user[key] !== originalUser[key] && user[key] !== "") {
+          modifiedFields[key] = user[key];
+        }
       });
 
-      if (missingFields.length > 0) {
-        toast.error("Todos los campos son obligatorios");
-        setLoading(false);
-        return;
+      if ("role" in modifiedFields) {
+        modifiedFields.role = parseInt(modifiedFields.role, 10);
       }
 
-      if (!userId && !password2) {
-        toast.error("Debe confirmar la contraseña");
-        setLoading(false);
-        return;
-      }
-
-      if (!userId) {
-        // Check if email already exists
-        try {
-          const emailCheck = await clientAxios.get(`/user/email/${user.email}`);
-          if (emailCheck.data) {
-            toast.error("Ya existe un usuario con este correo electrónico");
-            setLoading(false);
-            return;
-          }
-        } catch (error) {
-          if (error.response && error.response.status !== 404) {
-            toast.error("Error al verificar el correo electrónico");
-            setLoading(false);
-            return;
-          }
-        }
-
-        // Password validation
-        // Validación paso a paso para contraseña
-        if (user.password.length < 8) {
-          toast.error("La contraseña debe tener al menos 8 caracteres");
-          setLoading(false);
-          return;
-        }
-        if (!/[A-Z]/.test(user.password)) {
-          toast.error("La contraseña debe tener al menos una letra mayúscula");
-          setLoading(false);
-          return;
-        }
-        if (!/[0-9]/.test(user.password)) {
-          toast.error("La contraseña debe tener al menos un número");
-          setLoading(false);
-          return;
-        }
-        if (!/[!@#$%^&*/()?¡¿]/.test(user.password)) {
-          toast.error(
-            "La contraseña debe tener al menos un carácter especial (!@#$%^&*)"
-          );
-          setLoading(false);
-          return;
-        }
-
-        if (user.password !== password2) {
-          toast.error("Las contraseñas no coinciden");
-          setLoading(false);
-          return;
-        }
-
-        if (user.password !== password2) {
-          toast.error("Las contraseñas no coinciden");
-          setLoading(false);
-          return;
-        }
-      }
-
-      let response;
-      if (userId) {
-        // Get only modified fields for update
-        const modifiedFields = {};
-        Object.keys(user).forEach((key) => {
-          if (user[key] !== originalUser[key] && user[key] !== "") {
-            modifiedFields[key] = user[key];
-          }
-        });
-
-        // Ensure role is sent as a number
-        if ("role" in modifiedFields) {
-          modifiedFields.role = parseInt(modifiedFields.role, 10);
-        }
-
-        // Only send request if there are changes
-        if (Object.keys(modifiedFields).length > 0) {
-          response = await clientAxios.put(`/user/${userId}`, modifiedFields);
-        } else {
-          toast.info("No hay cambios para guardar");
-          setLoading(false);
-          return;
-        }
+      if (Object.keys(modifiedFields).length > 0) {
+        response = await clientAxios.put(`/user/${userId}`, modifiedFields);
       } else {
-        response = await clientAxios.post("/user", user);
-      }
-
-      if (response.status === 200) {
+        toast.info("No hay cambios para guardar");
         setLoading(false);
-        toast.success(
-          userId
-            ? "Usuario actualizado correctamente"
-            : "Usuario agregado correctamente"
-        );
-        navigate("/admin/users");
+        return;
       }
-    } catch (error) {
-      setLoading(false);
-      toast.error("Hubo un error al agregar el usuario");
-      console.log(error);
+    } else {
+      response = await clientAxios.post("/user", user);
     }
-  };
+
+    if (response.status === 200) {
+      setLoading(false);
+      toast.success(
+        userId
+          ? "Usuario actualizado correctamente"
+          : "Usuario agregado correctamente"
+      );
+      navigate("/admin/users");
+    }
+  } catch (error) {
+    setLoading(false);
+    toast.error("Hubo un error al agregar el usuario");
+    console.log(error);
+  }
+};
 
   return (
     <section className="container mx-auto">

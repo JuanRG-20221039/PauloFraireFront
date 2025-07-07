@@ -52,9 +52,6 @@ const EditNews = () => {
         setBlog({ ...blog, [e.target.name]: e.target.value })
     }
 
-
-    console.log(blog);
-
     useEffect(() => {
         const getBlog = async () => {
             try {
@@ -63,11 +60,12 @@ const EditNews = () => {
                 setImg(response.data?.img);
             } catch (error) {
                 console.log(error);
+                toast.error('Error al cargar la noticia');
             }
         }
 
         getBlog();
-    }, [])
+    }, [id]) // Añadir id como dependencia para que se actualice si cambia
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -92,7 +90,11 @@ const EditNews = () => {
             formData.append('description', blog.description);
             formData.append('date', blog.date);
             formData.append('isPublished', blog.isPublished);
-            formData.append('img', imgUrl);
+            
+            // Solo enviar la nueva imagen si se ha seleccionado una
+            if (imgUrl) {
+                formData.append('img', imgUrl);
+            }
 
             const response = await clientAxios.put(`/blog/${id}`, formData, config);
 
@@ -104,8 +106,8 @@ const EditNews = () => {
             }
 
         } catch (error) {
-            // console.log(error.response.data.msg);
-            // toast.error(error.response.data.msg);
+            console.error('Error al actualizar la noticia:', error);
+            toast.error(error.response?.data?.msg || 'Error al actualizar la noticia');
             setLoading(false);
         }
     }
@@ -129,7 +131,7 @@ const EditNews = () => {
                                     id="title"
                                     className='input-auth'
                                     placeholder="Ej. Noticia de la semana"
-                                    defaultValue={blog.title}
+                                    value={blog.title}
                                     onChange={updateState}
                                 />
                             </div>
@@ -143,7 +145,7 @@ const EditNews = () => {
                                     id="date"
                                     className='input-auth'
                                     placeholder="Ej. 23 de Enero del 2023"
-                                    defaultValue={blog.date}
+                                    value={blog.date}
                                     onChange={updateState}
                                 />
                             </div>
@@ -165,9 +167,7 @@ const EditNews = () => {
                                 />
 
                             </div>
-                            <div>
-                                alan 
-                            </div>
+                            {/* Espacio entre la selección de imagen y la vista previa */}
                             <div className='flex justify-center items-center w-full'>
                                 {
                                     img ? (
@@ -195,18 +195,11 @@ const EditNews = () => {
                                     name="isPublished"
                                     id="isPublished"
                                     className='input-auth'
+                                    value={blog.isPublished.toString()}
                                     onChange={updateState}
                                 >
-                                    {
-                                        blog.isPublished ? (
-                                            <option value="true">Publicado</option>
-                                        ) : (
-                                            <option value="false">No Publicado</option>
-                                        )
-                                    }
                                     <option value="true">Publicado</option>
                                     <option value="false">No Publicado</option>
-
                                 </select>
 
                             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react"; // Importa useRef para manejar el captcha
+import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { IoIosEyeOff } from "react-icons/io";
 import { IoLogIn } from "react-icons/io5";
@@ -6,7 +6,7 @@ import Spinner from "../../components/Spinner";
 import { toast } from "react-hot-toast";
 import clientAxios from "../../config/clientAxios";
 import ReCAPTCHA from "react-google-recaptcha";
-import ErrorHandler from "../../components/ErrorHandler"; // Importa el ErrorHandler
+import ErrorHandler from "../../components/ErrorHandler";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,16 +17,12 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [captchaValue, setCaptchaValue] = useState(null);
-  const [error, setError] = useState(null); // Estado para manejar errores
-  const captchaRef = useRef(null); // Crea una referencia para el captcha
+  const [error, setError] = useState(null);
+  const captchaRef = useRef(null);
 
-  const togglePassword = () => {
-    setShowPassword(!showPassword);
-  };
+  const togglePassword = () => setShowPassword(!showPassword);
 
-  const handleCaptchaChange = (value) => {
-    setCaptchaValue(value);
-  };
+  const handleCaptchaChange = (value) => setCaptchaValue(value);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,7 +32,12 @@ const Login = () => {
       return;
     }
 
-    if (user.email.trim() === "" || user.password.trim() === "") {
+    const cleanUser = {
+      email: user.email.trim(),
+      password: user.password.trim(),
+    };
+
+    if (cleanUser.email === "" || cleanUser.password === "") {
       toast.error("No puede haber campos vacíos");
       return;
     }
@@ -44,16 +45,14 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await clientAxios.post("/login", {
-        ...user,
+        ...cleanUser,
         captcha: captchaValue,
       });
 
       if (response.status === 200) {
-        //const userResponse = await clientAxios.get(`/user/email/${user.email}`);
-        //const userData = userResponse.data;
-        const userData = response.data.user; // Usa el user de la respuesta del login
+        const userData = response.data.user;
 
-        localStorage.setItem("token", JSON.stringify(response.data.user));
+        localStorage.setItem("token", JSON.stringify(userData));
 
         if (userData.role === 0) {
           navigate("/user/profile");
@@ -64,7 +63,6 @@ const Login = () => {
         }
       }
     } catch (error) {
-      // Extrae un mensaje legible del error
       let mensaje = "Ocurrió un error inesperado";
       if (error.response && error.response.data) {
         if (typeof error.response.data === "string") {
@@ -77,14 +75,13 @@ const Login = () => {
       } else if (error.message) {
         mensaje = error.message;
       }
-      setError({ message: mensaje, status: error.response?.status }); // Solo pasa info legible
-      console.log(error);
+      setError({ message: mensaje, status: error.response?.status });
       toast.error(mensaje);
     } finally {
       setLoading(false);
-      setCaptchaValue(null); // Reinicia el valor del captcha
+      setCaptchaValue(null);
       if (captchaRef.current) {
-        captchaRef.current.reset(); // Reinicia el captcha visualmente
+        captchaRef.current.reset();
       }
     }
   };
@@ -118,6 +115,7 @@ const Login = () => {
               onChange={updateState}
             />
           </div>
+
           <div>
             <label
               htmlFor="password"
@@ -148,17 +146,16 @@ const Login = () => {
             <ReCAPTCHA
               sitekey="6LeHymIqAAAAAIZGIyMwk1w749yFwuajNcPCUdNq"
               onChange={handleCaptchaChange}
-              ref={captchaRef} // Asigna la referencia al captcha
+              ref={captchaRef}
             />
           </div>
 
           <div className="flex flex-row justify-between">
-            <div>
-              <Link to="/olvide-password" className="font-medium text-blue-600">
-                Recuperar Contraseña?
-              </Link>
-            </div>
+            <Link to="/olvide-password" className="font-medium text-blue-600">
+              Recuperar Contraseña?
+            </Link>
           </div>
+
           {!loading ? (
             <button className="btn-action">
               <IoLogIn className="w-6 h-6" />
@@ -170,7 +167,6 @@ const Login = () => {
         </div>
       </form>
 
-      {/* Integra el ErrorHandler para manejar errores */}
       <ErrorHandler error={error} />
     </div>
   );
