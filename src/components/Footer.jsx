@@ -58,9 +58,9 @@ const Footer = () => {
             <Link to="/login" className="text-sm hover:underline">
               Iniciar Sesión
             </Link>
-            <Link to="/registro" className="text-sm hover:underline">
+            {/* <Link to="/registro" className="text-sm hover:underline">
               Registrarse
-            </Link>
+            </Link> */}
             <Link to="/acercade" className="text-sm hover:underline">
               Acerca de
             </Link>

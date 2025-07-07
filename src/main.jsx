@@ -17,7 +17,7 @@ import AcademyActivities from "./pages/AcademyActivities.jsx";
 import CallsEducational from "./pages/CallsEducational.jsx";
 import Bibloteca from "./pages/Bibloteca.jsx";
 import Login from "./auth/pages/Login.jsx";
-import Registro from "./auth/pages/Registro.jsx";
+// import Registro from "./auth/pages/Registro.jsx";
 import Recuperar from "./auth/pages/Recuperar.jsx";
 import NewItemPage from "./admin/pages/news/NewItemPage.jsx";
 import HistoryDetail from "./pages/HistoryDetail.jsx";
@@ -78,7 +78,7 @@ const router = createBrowserRouter([
       { path: "/academy-activities", element: <AcademyActivities /> },
       { path: "/biblioteca", element: <Bibloteca /> },
       { path: "/login", element: <Login /> },
-      { path: "/registro", element: <Registro /> },
+      // { path: "/registro", element: <Registro /> },
       { path: "/new-item/:id", element: <NewItemPage /> },
       { path: "/contexto-contemporaneo", element: <ContextContemporaneo /> },
       { path: "/historia", element: <HistoryDetail /> },
