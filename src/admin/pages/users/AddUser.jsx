@@ -1,3 +1,4 @@
+//AddUser.jsx
 import React, { useState, useEffect } from 'react'
 import clientAxios from '../../../config/clientAxios';
 import Spinner from '../../../components/Spinner';
@@ -24,6 +25,7 @@ const AddUser = () => {
     useEffect(() => {
         if (userId) {
             const getUser = async () => {
+                setLoading(true); // empieza loading
                 try {
                     const response = await clientAxios.get(`/user/${userId}`);
                     const userData = response.data;
@@ -40,11 +42,15 @@ const AddUser = () => {
                     console.log(error);
                     toast.error('Error al cargar los datos del usuario');
                 }
+                setLoading(false); // termina loading
             };
             getUser();
         }
     }, [userId]);
 
+    // Si está cargando, muestra el spinner
+    if (loading) return <Spinner />;
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -180,7 +186,7 @@ const AddUser = () => {
                                     id="name"
                                     className='input-auth'
                                     placeholder="Ej. Adan"
-                                    defaultValue={user.name}
+                                    value={user.name || ''}
                                     onChange={e => setUser({ ...user, name: e.target.value })}
                                 />
                             </div>
@@ -194,7 +200,7 @@ const AddUser = () => {
                                     id="lastName"
                                     className='input-auth'
                                     placeholder="Ej. Lopez Martinez"
-                                    defaultValue={user.lastName}
+                                    value={user.lastName || ''}
                                     onChange={e => setUser({ ...user, lastName: e.target.value })}
                                 />
                             </div>
@@ -210,7 +216,7 @@ const AddUser = () => {
                                     id="email"
                                     className='input-auth'
                                     placeholder="Ej. correo@correo.com"
-                                    defaultValue={user.email}
+                                    value={user.email || ''}
                                     onChange={e => setUser({ ...user, email: e.target.value })}
                                 />
                             </div>
@@ -222,7 +228,7 @@ const AddUser = () => {
                                     name="rol"
                                     id="rol"
                                     className='input-auth'
-                                    defaultValue={user.role}
+                                    value={user.role || ''}
                                     onChange={e => setUser({ ...user, role: e.target.value })}
                                 >
                                     <option value="">--Seleccione un Rol</option>
@@ -244,7 +250,7 @@ const AddUser = () => {
                                         name="password"
                                         id="password" className='input-auth'
                                         placeholder="Ingrese su Contraseña"
-                                        defaultValue={user.password}
+                                        value={user.password}
                                         onChange={e => setUser({ ...user, password: e.target.value })}
                                     />
                                     <IoIosEyeOff
@@ -264,7 +270,7 @@ const AddUser = () => {
                                         name="password2"
                                         id="password2" className='input-auth'
                                         placeholder="Ingrese su Contraseña"
-                                        defaultValue={password2}
+                                        value={password2}
                                         onChange={e => setPassword2(e.target.value)}
                                     />
                                     <IoIosEyeOff

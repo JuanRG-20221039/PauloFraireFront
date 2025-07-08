@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+//AdminUsers.jsx
+import React, { useEffect, useState, useCallback } from 'react'
 import clientAxios from '../../../config/clientAxios'
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { TiEdit } from 'react-icons/ti';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { IoIosAddCircle } from 'react-icons/io';
@@ -8,11 +9,22 @@ import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import useAuth from "../../../hooks/useAuth";
 
+
 const AdminUsers = () => {
     const { token, logout } = useAuth();
     const [users, setUsers] = useState([]);
     const navigate = useNavigate();
-
+    // Se obtiene la ubicación actual para actualizar la lista de usuarios
+    // cuando se agrega o edita un usuario
+    // Esto es útil para evitar tener que recargar la página manualmente
+    // y para que los cambios se reflejen inmediatamente en la interfaz de usuario
+    // Se usa useLocation de react-router-dom para obtener la ubicación actual
+    // y se accede a location.state para obtener el estado de la navegación
+    // que contiene la información de si se ha actualizado un usuario o no
+    // Esto permite que el componente se actualice automáticamente cuando se agrega o edita un usuario
+    const location = useLocation();
+    // Configuración para las peticiones
+    // Se agrega el token de autorización en los headers
     const config = {
         headers: {
             "Content-Type": "application/json",
@@ -64,20 +76,20 @@ const AdminUsers = () => {
             }
         }
         getUsers();
-    }, [token]);
+    }, [token, location.state?.updated]);
 
-    const roleDefault = (role) => {
+    // Función para convertir el rol numérico a un texto legible
+    // Esta función toma un número que representa el rol del usuario
+    // y devuelve una cadena de texto que describe el rol
+    // Por ejemplo, si el rol es 0, devuelve 'Estudiante
+    const roleDefault = useCallback((role) => {
         switch (parseInt(role)) {
-            case 0:
-                return 'Estudiante';
-            case 1:
-                return 'Administrador';
-            case 2:
-                return 'Editor';
-            default:
-                return 'Usuario básico';
+            case 0: return 'Estudiante';
+            case 1: return 'Administrador';
+            case 2: return 'Editor';
+            default: return 'Usuario básico';
         }
-    }
+    }, []);
 
     return (
         <section className="container mx-auto bg-slate-50">
