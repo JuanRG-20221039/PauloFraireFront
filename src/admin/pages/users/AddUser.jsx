@@ -2,25 +2,23 @@
 import React, { useState, useEffect } from 'react'
 import clientAxios from '../../../config/clientAxios';
 import Spinner from '../../../components/Spinner';
-import { toast } from 'react-hot-toast'
+import { toast } from 'react-hot-toast';
 import { IoIosEyeOff } from 'react-icons/io';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const AddUser = () => {
+  const [user, setUser] = useState({});
+  const [originalUser, setOriginalUser] = useState({});
+  const [password2, setPassword2] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-    const [user, setUser] = useState({});
-    const [originalUser, setOriginalUser] = useState({});
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const userId = searchParams.get('id');
 
-    const [password2, setPassword2] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-
-    const togglePassword = () => setShowPassword(!showPassword);
-
-    const location = useLocation();
-    const searchParams = new URLSearchParams(location.search);
-    const userId = searchParams.get('id');
+  const togglePassword = () => setShowPassword(!showPassword);
 
     useEffect(() => {
         if (userId) {
@@ -55,122 +53,104 @@ const AddUser = () => {
         e.preventDefault();
         setLoading(true);
 
+    try {
+      const requiredFields = userId
+        ? ['name', 'lastName', 'email', 'role']
+        : ['name', 'lastName', 'email', 'password', 'role'];
+
+      const missingFields = requiredFields.filter(field => {
+        const value = user[field];
+        return value === undefined || value === null || value === '' || (typeof value === 'string' && !value.trim());
+      });
+
+      if (missingFields.length > 0) {
+        toast.error('Todos los campos son obligatorios');
+        return;
+      }
+
+      if (!userId && !password2) {
+        toast.error('Debe confirmar la contraseña');
+        return;
+      }
+
+      if (!userId) {
         try {
-            // Validar campos requeridos
-            const requiredFields = userId 
-                ? ['name', 'lastName', 'email', 'role']
-                : ['name', 'lastName', 'email', 'password', 'role'];
-
-            const missingFields = requiredFields.filter(field => {
-                const value = user[field];
-                if (value === undefined || value === null || value === '') return true;
-                if (typeof value === 'string') return !value.trim();
-                return false;
-            });
-
-            if (missingFields.length > 0) {
-                toast.error('Todos los campos son obligatorios');
-                setLoading(false);
-                return;
-            }
-
-            if (!userId && !password2) {
-                toast.error('Debe confirmar la contraseña');
-                setLoading(false);
-                return;
-            }
-
-            if (!userId) {
-                // Check if email already exists
-                try {
-                    const emailCheck = await clientAxios.get(`/user/email/${user.email}`);
-                    if (emailCheck.data) {
-                        toast.error('Ya existe un usuario con este correo electrónico');
-                        setLoading(false);
-                        return;
-                    }
-                } catch (error) {
-                    if (error.response && error.response.status !== 404) {
-                        toast.error('Error al verificar el correo electrónico');
-                        setLoading(false);
-                        return;
-                    }
-                }
-
-                // Password validation
-                const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~]{8,}$/;
-
-                if (!passwordRegex.test(user.password)) {
-                    toast.error('La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial');
-                    setLoading(false);
-                    return;
-                }
-
-                if (user.password !== password2) {
-                    toast.error('Las contraseñas no coinciden');
-                    setLoading(false);
-                    return;
-                }
-            }
-
-            let response;
-            if (userId) {
-                // Get only modified fields for update
-                const modifiedFields = {};
-                Object.keys(user).forEach(key => {
-                    if (user[key] !== originalUser[key] && user[key] !== '') {
-                        modifiedFields[key] = user[key];
-                    }
-                });
-                
-                // Ensure role is sent as a number
-                if ('role' in modifiedFields) {
-                    modifiedFields.role = parseInt(modifiedFields.role, 10);
-                }
-
-                // Only send request if there are changes
-                if (Object.keys(modifiedFields).length > 0) {
-                    response = await clientAxios.put(`/user/${userId}`, modifiedFields);
-                } else {
-                    toast.info('No hay cambios para guardar');
-                    setLoading(false);
-                    return;
-                }
-            } else {
-                response = await clientAxios.post('/user', user);
-            }
-
-            if (response.status === 200) {
-                setLoading(false);
-                toast.success(userId ? 'Usuario actualizado correctamente' : 'Usuario agregado correctamente');
-                navigate('/admin/users');
-            }
-
+          const emailCheck = await clientAxios.get(`/user/email/${user.email}`);
+          if (emailCheck.data) {
+            toast.error('Ya existe un usuario con este correo electrónico');
+            return;
+          }
         } catch (error) {
-            setLoading(false);
-            toast.error('Hubo un error al agregar el usuario');
-            console.log(error);
+          if (error.response?.status !== 404) {
+            toast.error('Error al verificar el correo electrónico');
+            return;
+          }
         }
+
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}$/;
+        if (!passwordRegex.test(user.password)) {
+          toast.error('La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial');
+          return;
+        }
+
+        if (user.password !== password2) {
+          toast.error('Las contraseñas no coinciden');
+          return;
+        }
+      }
+
+      let response;
+      if (userId) {
+        const modifiedFields = {};
+        Object.keys(user).forEach(key => {
+          if (user[key] !== originalUser[key] && user[key] !== '') {
+            modifiedFields[key] = user[key];
+          }
+        });
+
+        if ('role' in modifiedFields) {
+          modifiedFields.role = parseInt(modifiedFields.role, 10);
+        }
+
+        if (Object.keys(modifiedFields).length > 0) {
+          response = await clientAxios.put(`/user/${userId}`, modifiedFields);
+        } else {
+          toast.info('No hay cambios para guardar');
+          return;
+        }
+      } else {
+        response = await clientAxios.post('/user', user);
+      }
+
+      if (response.status === 200) {
+        toast.success(userId ? 'Usuario actualizado correctamente' : 'Usuario agregado correctamente');
+        navigate('/admin/users');
+      }
+    } catch (error) {
+      toast.error('Hubo un error al agregar el usuario');
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return (
-        <section className="container mx-auto">
+  return (
+    <section className="container mx-auto">
+      <h1 className="text-center text-3xl font-bold text-slate-600 mt-10">
+        {userId ? 'Editar Usuario' : 'Agregar Usuario'}
+      </h1>
 
-            <h1 className="text-center text-3xl font-bold text-slate-600 mt-10">
-                {userId ? 'Editar Usuario' : 'Agregar Usuario'}
-            </h1>
-
-            <div className="flex justify-center w-full">
-                <div className="mb-4 flex w-1/4 justify-center">
-                    <button
-                        type="button"
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded mt-5 w-full h-full"
-                        onClick={() => navigate('/admin/users')}
-                    >
-                        Volver
-                    </button>
-                </div>
-            </div>
+      <div className="flex justify-center w-full">
+        <div className="mb-4 flex w-1/4 justify-center">
+          <button
+            type="button"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded mt-5 w-full h-full"
+            onClick={() => navigate('/admin/users')}
+          >
+            Volver
+          </button>
+        </div>
+      </div>
 
             <div className=' max-w-5xl mx-auto p-4 mt-10 shadow-lg'>
                 <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
@@ -281,25 +261,14 @@ const AddUser = () => {
                                 </div>
                             </div>
 
-                        </div>
+            <button type="submit" className="btn-action">
+              {userId ? 'Actualizar Usuario' : 'Agregar Usuario'}
+            </button>
+          </form>
+        )}
+      </div>
+    </section>
+  );
+};
 
-                        {
-                            loading ? <Spinner /> : (
-                                <button
-                                    type="submit"
-                                    className="btn-action"
-                                >
-                                    {userId ? 'Actualizar Usuario' : 'Agregar Usuario'}
-                                </button>
-                            )
-                        }
-                    </div>
-
-                </form>
-            </div>
-
-        </section>
-    )
-}
-
-export default AddUser
+export default AddUser;
