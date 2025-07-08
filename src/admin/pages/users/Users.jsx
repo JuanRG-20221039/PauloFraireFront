@@ -1,4 +1,3 @@
-//Users.jsx
 import React, { useState, useEffect } from 'react';
 import clientAxios from '../../../config/clientAxios';
 import { Link } from 'react-router-dom';
@@ -57,6 +56,13 @@ const Users = () => {
         }
     };
 
+    const handleChangeEditingUser = useCallback((field, value) => {
+        setEditingUser(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    }, []);
+
     const getRoleName = (role) => {
         switch (role) {
             case '0': return 'Estudiante';
@@ -97,7 +103,11 @@ const Users = () => {
                                     <div className="flex space-x-3">
                                         <button
                                             onClick={() => {
-                                                setEditingUser(user);
+                                                const roleAsNumber = Number(user.role);
+                                                setEditingUser({
+                                                    ...user,
+                                                role: [0, 1, 2].includes(roleAsNumber) ? roleAsNumber : '', // ← asegura valor válido
+                                                });
                                                 setShowEditModal(true);
                                             }}
                                             className="text-blue-600 hover:text-blue-900"
@@ -151,13 +161,14 @@ const Users = () => {
                     <div className="bg-white rounded-lg p-6 max-w-lg w-full">
                         <h3 className="text-lg font-bold mb-4">Editar Usuario</h3>
                         <form onSubmit={handleEdit}>
+                            {console.log('Edit Modal render')}
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Nombre</label>
                                     <input
                                         type="text"
                                         value={editingUser.name}
-                                        onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+                                        onChange={(e) => handleChangeEditingUser('name', e.target.value)}
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     />
                                 </div>
@@ -166,7 +177,7 @@ const Users = () => {
                                     <input
                                         type="text"
                                         value={editingUser.lastName}
-                                        onChange={(e) => setEditingUser({...editingUser, lastName: e.target.value})}
+                                        onChange={(e) => handleChangeEditingUser('lastName', e.target.value)}
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     />
                                 </div>
@@ -175,15 +186,15 @@ const Users = () => {
                                     <input
                                         type="email"
                                         value={editingUser.email}
-                                        onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+                                        onChange={(e) => handleChangeEditingUser('email', e.target.value)}
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Rol</label>
                                     <select
-                                        value={editingUser.role}
-                                        onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}
+                                        value={editingUser.role?.toString() ?? ''}
+                                        onChange={(e) => handleChangeEditingUser('role', parseInt(e.target.value, 10))}
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     >
                                         <option value="0">Estudiante</option>
