@@ -89,13 +89,15 @@ const handleSubmit = async (e) => {
           return;
         }
       }
-
-      // Validación de la contraseña
-      const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~]{8,}$/;
+    }
+    
+    // Validación de la contraseña (tanto para nuevos usuarios como para edición)
+    if (!userId || (userId && user.password && user.password.trim() !== "")) {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~]{8,}$/;
 
       if (!passwordRegex.test(user.password)) {
         toast.error(
-          "La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial"
+          "La contraseña debe tener al menos 8 caracteres, una minúscula, una mayúscula, un número y un carácter especial"
         );
         setLoading(false);
         return;

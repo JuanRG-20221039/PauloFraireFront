@@ -58,6 +58,8 @@ const Login = () => {
           navigate("/user/profile");
         } else if (userData.role === 1) {
           navigate("/admin/home");
+        } else if (userData.role === 2) {
+        navigate("/admin/home");
         } else {
           toast.error("Rol desconocido. Contacta al administrador.");
         }
