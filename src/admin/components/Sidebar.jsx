@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { FaNewspaper, FaAngleDoubleDown, FaCog, FaBook } from "react-icons/fa";
+import {
+  FaNewspaper,
+  FaAngleDoubleDown,
+  FaCog,
+  FaBook,
+  FaUsers,
+} from "react-icons/fa";
 import { TiThMenuOutline } from "react-icons/ti";
 import { BiHomeAlt, BiSelectMultiple } from "react-icons/bi";
 import { SiGoogleclassroom, SiInstructure } from "react-icons/si";
@@ -58,6 +64,11 @@ const adminNavItems = [
     to: "/admin/configempresa",
     icon: <FaCog className="text-2xl" />,
     label: "Configuración datos de la empresa",
+  },
+  {
+    to: "/admin/QuienesSomos",
+    icon: <FaUsers className="text-2xl" />,
+    label: "Quienes somos",
   },
 ];
 
@@ -172,9 +183,7 @@ const SideBar = () => {
                       to={subItem.to}
                     >
                       <span
-                        className={`${
-                          !open ? "hidden" : "block"
-                        } duration-200`}
+                        className={`${!open ? "hidden" : "block"} duration-200`}
                       >
                         {subItem.label}
                       </span>
