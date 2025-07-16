@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FiEdit, FiXCircle } from "react-icons/fi";
 import Swal from "sweetalert2";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import clientAxios from "../../../config/clientAxios";
@@ -134,21 +135,35 @@ const QuienesSomos = () => {
         <p className="text-center">Cargando...</p>
       ) : (
         <>
-          <div className="flex justify-end mb-4 gap-4">
-            <button
-              className="p-2 bg-blue-600 text-white rounded"
-              onClick={() => setEditMode(!editMode)}
-            >
-              {editMode ? "Cancelar edición" : "Editar Contenido"}
-            </button>
-            {data && (
+          <div className="flex my-2 mx-10 gap-4">
+            <div className="p-2">
               <button
-                className="p-2 bg-red-600 text-white rounded"
-                onClick={handleDelete}
+                className="btn-action p-2 flex items-center gap-2"
+                onClick={() => setEditMode(!editMode)}
               >
-                <RiDeleteBin6Line className="inline-block mr-1" />
-                Eliminar Contenido
+                {editMode ? (
+                  <>
+                    <FiXCircle className="text-xl" />
+                    Cancelar edición
+                  </>
+                ) : (
+                  <>
+                    <FiEdit className="text-xl" />
+                    {data ? "Editar Contenido" : "Agregar Contenido"}
+                  </>
+                )}
               </button>
+            </div>
+            {data && (
+              <div className="flex my-2 mx-100 gap-4">
+                <button
+                  className="flex items-center gap-2 bg-red-500 text-white hover:bg-red-600 duration-150  p-2 cursor-pointer font-bold text-sm"
+                  onClick={handleDelete}
+                >
+                  <RiDeleteBin6Line className="text-xl" />
+                  Eliminar Contenido
+                </button>
+              </div>
             )}
           </div>
 
@@ -158,8 +173,9 @@ const QuienesSomos = () => {
               className="bg-white shadow p-4 rounded"
             >
               <div className="mb-4">
-                <label className="font-bold">Título Principal</label>
+                <label className="font-bold">Titulo Principal:</label>
                 <input
+                  required
                   name="tituloPrincipal"
                   value={form.tituloPrincipal}
                   onChange={handleChange}
@@ -169,15 +185,17 @@ const QuienesSomos = () => {
 
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="mb-4">
-                  <label className="font-bold">{`Subtítulo ${i}`}</label>
+                  <label className="font-bold">{`Subtitulo ${i}`}:</label>
                   <input
+                    required
                     name={`subtitulo${i}`}
                     value={form[`subtitulo${i}`]}
                     onChange={handleChange}
                     className="w-full border p-2"
                   />
-                  <label className="font-bold mt-2">{`Contenido ${i}`}</label>
+                  <label className="font-bold mt-2">{`Contenido ${i}`}:</label>
                   <textarea
+                    required
                     name={`contenido${i}`}
                     value={form[`contenido${i}`]}
                     onChange={handleChange}
@@ -187,8 +205,9 @@ const QuienesSomos = () => {
               ))}
 
               <div className="mb-4">
-                <label className="font-bold">Título del Video</label>
+                <label className="font-bold">Titulo del Video</label>
                 <input
+                  required
                   name="videoTitulo"
                   value={form.videoTitulo}
                   onChange={handleChange}
@@ -199,25 +218,13 @@ const QuienesSomos = () => {
               <div className="mb-4">
                 <label className="font-bold">Archivo de Video</label>
                 <input
+                  required
                   type="file"
                   accept="video/mp4,video/webm,video/x-matroska"
                   onChange={(e) => setVideoFile(e.target.files[0])}
                   className="w-full"
                 />
               </div>
-
-              {uploadProgress !== null && (
-                <div className="mb-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Subiendo video: {uploadProgress}%
-                  </label>
-                  <progress
-                    value={uploadProgress}
-                    max="100"
-                    className="w-full h-3 rounded overflow-hidden bg-gray-200"
-                  ></progress>
-                </div>
-              )}
 
               <button
                 type="submit"
@@ -230,21 +237,46 @@ const QuienesSomos = () => {
               </button>
             </form>
           ) : data ? (
-            <div className="bg-white shadow p-4 rounded">
-              <h2 className="text-xl font-bold mb-2">{data.tituloPrincipal}</h2>
+            <form className="bg-white shadow p-4 rounded">
+              <div className="mb-4">
+                <label className="font-bold">Título Principal:</label>
+                <input
+                  value={data.tituloPrincipal}
+                  readOnly
+                  className="w-full border p-2 bg-white cursor-default"
+                />
+              </div>
+
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="mb-4">
-                  <h3 className="font-semibold text-slate-600">
-                    {data[`subtitulo${i}`]}
-                  </h3>
-                  <p>{data[`contenido${i}`]}</p>
+                  <label className="font-bold">{`Subtitulo ${i}:`}</label>
+                  <input
+                    value={data[`subtitulo${i}`]}
+                    readOnly
+                    className="w-full border p-2 bg-gray cursor-default"
+                  />
+                  <label className="font-bold mt-2 block">{`Contenido ${i}:`}</label>
+                  <textarea
+                    value={data[`contenido${i}`]}
+                    readOnly
+                    className="w-full border p-2 bg-white cursor-default"
+                  />
                 </div>
               ))}
+
+              {data.videoTitulo && (
+                <div className="mb-4">
+                  <label className="font-bold">Título del Video</label>
+                  <input
+                    value={data.videoTitulo}
+                    readOnly
+                    className="w-full border p-2 bg-gray cursor-default"
+                  />
+                </div>
+              )}
+
               {data.videoUrl && (
-                <div className="mt-4">
-                  <p className="font-semibold mb-1">
-                    Video: {data.videoTitulo}
-                  </p>
+                <div className="flex justify-center mt-4">
                   <video
                     src={data.videoUrl}
                     controls
@@ -252,7 +284,7 @@ const QuienesSomos = () => {
                   />
                 </div>
               )}
-            </div>
+            </form>
           ) : (
             <p className="text-red-600 text-center">
               No hay contenido institucional disponible.
