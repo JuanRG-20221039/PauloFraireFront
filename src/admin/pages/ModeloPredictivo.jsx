@@ -176,6 +176,10 @@ const BuscarEstudiante = () => {
           <table className="table-auto w-full text-sm border">
             <tbody>
               {Object.entries(selectedEstudiante).map(([key, value]) => {
+                // Ocultar campos seDioDeBaja y desempeno
+                if (key === 'seDioDeBaja' || key === 'desempeno') {
+                  return null;
+                }
                 if (typeof value === 'object' && value !== null) {
                   return (
                     <tr key={key}>
