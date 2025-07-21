@@ -6,6 +6,7 @@ import {
   FaCog,
   FaBook,
   FaUsers,
+  FaLandmark,
 } from "react-icons/fa";
 import { TiThMenuOutline } from "react-icons/ti";
 import { BiHomeAlt, BiSelectMultiple } from "react-icons/bi";
@@ -69,6 +70,11 @@ const adminNavItems = [
     to: "/admin/QuienesSomos",
     icon: <FaUsers className="text-2xl" />,
     label: "Quienes somos",
+  },
+  {
+    to: "/admin/historiacultura",
+    icon: <FaLandmark className="text-2xl" />,
+    label: "Historia y Cultura",
   },
 ];
 
