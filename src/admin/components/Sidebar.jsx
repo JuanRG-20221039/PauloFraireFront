@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaNewspaper,
@@ -12,8 +12,9 @@ import { TiThMenuOutline } from "react-icons/ti";
 import { BiHomeAlt, BiSelectMultiple } from "react-icons/bi";
 import { SiGoogleclassroom, SiInstructure } from "react-icons/si";
 import { GiThink } from "react-icons/gi";
-import { AiFillDollarCircle } from "react-icons/ai";
+import { AiFillAlert, AiFillDollarCircle } from "react-icons/ai";
 import { TbLogin } from "react-icons/tb";
+import useAuth from "../../hooks/useAuth";
 
 const adminNavItems = [
   {
@@ -52,6 +53,11 @@ const adminNavItems = [
     label: "Becas",
   },
   {
+    to: "/admin/modelopredictivo",
+    icon: <AiFillAlert className="text-2xl" />,
+    label: "Predicción de Estudiantes",
+  },
+  {
     to: "/admin/about",
     icon: <FaBook className="text-2xl" />,
     label: "Acerca de",
@@ -81,7 +87,28 @@ const adminNavItems = [
 const SideBar = () => {
   const [open, setOpen] = useState(true);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [filteredNavItems, setFilteredNavItems] = useState([]);
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    // Obtener el rol del usuario desde localStorage
+    const userRole = localStorage.getItem("token") 
+      ? JSON.parse(localStorage.getItem("token")).role 
+      : null;
+    
+    // Filtrar elementos del menú según el rol
+    if (userRole === 2) { // Si es editor
+      // Excluir los módulos de Usuarios y Configuración datos de la empresa
+      const filtered = adminNavItems.filter(item => 
+        item.to !== "/admin/users" && item.to !== "/admin/configempresa"
+      );
+      setFilteredNavItems(filtered);
+    } else {
+      // Para administradores y otros roles, mostrar todos los elementos
+      setFilteredNavItems(adminNavItems);
+    }
+  }, []);
 
   const handleSubmit = () => {
     localStorage.removeItem("token");
@@ -121,7 +148,7 @@ const SideBar = () => {
         >
           Menu
         </p>
-        {adminNavItems.map((item, index) => (
+        {filteredNavItems.map((item, index) => (
           <li key={index} className="space-y-2">
             {item.subItems ? (
               <div className="flex items-center">

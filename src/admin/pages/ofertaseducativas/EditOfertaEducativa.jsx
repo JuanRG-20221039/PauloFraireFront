@@ -66,15 +66,12 @@ const EditEducationalOffer = () => {
     const newPdfs = Array.from(e.target.files);
     setPdfs([...pdfs, ...newPdfs]);
 
-    // Actualizar existingPdfs con los nuevos PDFs
-    const newExistingPdfs = newPdfs.map((file) => ({
-      url: URL.createObjectURL(file), // URL temporal para previsualización
-      name: file.name,
-    }));
-    setExistingPdfs([...existingPdfs, ...newExistingPdfs]);
+    // No actualizamos existingPdfs aquí, ya que estos son PDFs nuevos que aún no están en el servidor
+    // Los mostraremos por separado en la interfaz
   };
 
   const removePdf = (index) => {
+    // Eliminar un PDF nuevo (que aún no se ha subido al servidor)
     setPdfs(pdfs.filter((_, i) => i !== index));
   };
 
@@ -82,11 +79,12 @@ const EditEducationalOffer = () => {
     try {
       await clientAxios.put(
         `/updateEducationalOffer/${id}`,
-        { pdfsToDelete: [pdfUrl] },
+        { removePdfs: JSON.stringify([pdfUrl]) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setExistingPdfs(existingPdfs.filter((pdf) => pdf.url !== pdfUrl));
     } catch (error) {
+      console.error("Error al eliminar PDF:", error);
       Swal.fire("Error", "No se pudo eliminar el PDF", "error");
     }
   };
@@ -133,7 +131,8 @@ const handleSubmit = async (e) => {
     formData.append("imageUrl", currentImage);
   }
 
-  existingPdfs.forEach((pdf) => formData.append("existingPdfs", pdf.url));
+  // No es necesario enviar los PDFs existentes, ya que el backend los mantiene
+  // a menos que se eliminen específicamente con removePdfs
   pdfs.forEach((pdf) => formData.append("pdfs", pdf));
 
   try {
@@ -260,6 +259,30 @@ const handleSubmit = async (e) => {
               </div>
             )}
 
+            {/* Mostrar PDFs nuevos que se van a subir */}
+            {pdfs.length > 0 && (
+              <div className="space-y-2 mb-4">
+                <h3 className="text-sm font-medium text-gray-700">PDFs nuevos a subir:</h3>
+                {pdfs.map((pdf, index) => (
+                  <div
+                    key={`new-${index}`}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="text-gray-600">
+                      {pdf.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removePdf(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <RiDeleteBin6Line className="text-xl" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Input para agregar más PDFs */}
             <input
               type="file"
@@ -274,9 +297,7 @@ const handleSubmit = async (e) => {
                 htmlFor="pdfInput"
                 className="w-full text-gray-500 cursor-pointer"
               >
-                {pdfs.length > 0
-                  ? `Se han agregado ${pdfs.length} archivos`
-                  : "No se ha seleccionado ningún PDF"}
+                Agregar nuevos PDFs
               </label>
               <button
                 type="button"

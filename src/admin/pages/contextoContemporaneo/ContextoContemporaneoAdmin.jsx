@@ -76,6 +76,20 @@ export default function ContextoContemporaneoAdmin() {
     }));
   };
 
+  // Función para verificar el tamaño del archivo PDF
+  const checkPdfFileSize = (file) => {
+    if (!file) return true;
+    
+    const maxSize = 10 * 1024 * 1024; // 10MB en bytes
+    if (file.size > maxSize) {
+      // Convertir bytes a MB para mostrar en el mensaje
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      toast.error(`El archivo PDF excede el tamaño máximo permitido: ${fileSizeMB}MB / 10MB`);
+      return false;
+    }
+    return true;
+  };
+
   const handleArrayInputChange = (index, field, value) => {
     if (field === 'secondaryLinks') {
       setFormData(prev => {
@@ -87,6 +101,13 @@ export default function ContextoContemporaneoAdmin() {
         };
       });
     } else if (field === 'pdfs' || field === 'Ppdfs') {
+      // Verificar el tamaño del archivo PDF si se está cambiando el archivo
+      if (value.archivo instanceof File) {
+        if (!checkPdfFileSize(value.archivo)) {
+          return; // No actualizar el estado si el archivo es demasiado grande
+        }
+      }
+      
       setPdfData(prev => {
         const newArray = [...prev[field]];
         newArray[index] = { ...newArray[index], ...value };
@@ -178,25 +199,18 @@ export default function ContextoContemporaneoAdmin() {
       };
       let contextResponse;
       if (editingId) {
-        // DEBUG:
-        // console.log("Actualizando contexto con ID:", editingId, formData);
         contextResponse = await clientAxios.put(
           `/contexto-contemporaneo/${editingId}`,
           formData,
           contextConfig
         );
       } else {
-        // DEBUG:
-        // console.log("Creando nuevo contexto:", formData);
         contextResponse = await clientAxios.post(
           '/contexto-contemporaneo',
           formData,
           contextConfig
         );
       }
-      // DEBUG:
-      // console.log("Respuesta del servidor al guardar contexto:", contextResponse.data);
-
       toast.success(editingId ? 'Contenido actualizado exitosamente' : 'Contenido creado exitosamente');
       await fetchContextos();
     } catch (error) {
@@ -216,10 +230,6 @@ export default function ContextoContemporaneoAdmin() {
     e.preventDefault();
     setLoading(true);
 
-    // DEBUG:
-    // console.log("Iniciando subida de PDFs...");
-    // console.log("pdfData actual:", pdfData);
-
     try {
       // Función para validar que los campos requeridos estén presentes
       const validatePdfFields = (pdf) => {
@@ -235,8 +245,9 @@ export default function ContextoContemporaneoAdmin() {
         if (file.type !== 'application/pdf') {
           throw new Error('El archivo debe ser un PDF');
         }
-        if (file.size > 10 * 1024 * 1024) {
-          throw new Error('El archivo no debe superar los 10MB');
+        // Usar la misma función de verificación de tamaño que se usa en la interfaz
+        if (!checkPdfFileSize(file)) {
+          throw new Error(`El archivo PDF excede el tamaño máximo permitido de 10MB`);
         }
         return true;
       };
@@ -244,12 +255,8 @@ export default function ContextoContemporaneoAdmin() {
       // Función para subir los PDFs
       const uploadPdfs = async (pdfs, isPremium = false) => {
         for (const pdf of pdfs) {
-          // DEBUG:
-          // console.log("Procesando PDF:", pdf);
 
           if (!pdf.nombre?.trim() || !pdf.archivo) {
-            // DEBUG:
-            // console.log("Saltando PDF vacío o sin archivo:", pdf);
             continue;
           }
 
@@ -263,8 +270,6 @@ export default function ContextoContemporaneoAdmin() {
             formData.append('archivo', pdf.archivo);
             formData.append('tipo', isPremium ? '1' : '0');
 
-            // DEBUG:
-            // console.log("Creando FormData para el PDF:", pdf.nombre);
             if (isPremium && pdf.imagen instanceof File) {
               if (!pdf.imagen.type.startsWith('image/')) {
                 throw new Error('El archivo de imagen debe ser una imagen válida');
@@ -272,9 +277,7 @@ export default function ContextoContemporaneoAdmin() {
               formData.append('imagen', pdf.imagen);
             }
 
-            // DEBUG: ver qué contiene el FormData
             for (let pair of formData.entries()) {
-              // console.log('FormData entry:', pair[0], pair[1]);
             }
 
             const pdfConfig = {
@@ -284,11 +287,7 @@ export default function ContextoContemporaneoAdmin() {
               },
             };
 
-            // DEBUG:
-            // console.log("Enviando PDF al backend (POST /pdfs-cc)...");
-
             const response = await clientAxios.post('/pdfs-cc', formData, pdfConfig);
-            // console.log('PDF uploaded successfully:', response.data);
           } catch (error) {
             console.error('PDF upload failed:', error.response?.data || error.message);
             throw error;
@@ -296,10 +295,7 @@ export default function ContextoContemporaneoAdmin() {
         }
       };
 
-      // Subir PDFs básicos y premium secuencialmente
-      // console.log("Subiendo PDFs básicos...");
       await uploadPdfs(pdfData.pdfs.filter(pdf => pdf.nombre && pdf.archivo));
-      // console.log("Subiendo PDFs premium...");
       await uploadPdfs(pdfData.Ppdfs.filter(pdf => pdf.nombre && pdf.archivo), true);
 
       toast.success('PDFs subidos exitosamente');
@@ -466,12 +462,15 @@ export default function ContextoContemporaneoAdmin() {
                 onChange={(e) => handleArrayInputChange(index, 'pdfs', { descripcion: e.target.value })}
                 className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
-              <input
-                type="file"
-                accept=".pdf"
-                onChange={(e) => handleArrayInputChange(index, 'pdfs', { archivo: e.target.files[0] })}
-                className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <div className="flex-1 flex flex-col">
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => handleArrayInputChange(index, 'pdfs', { archivo: e.target.files[0] })}
+                  className="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full"
+                />
+                <small className="text-amber-600 font-medium mt-1">⚠️ Tamaño máximo: 10MB</small>
+              </div>
               <button
                 type="button"
                 onClick={() => removeArrayField('pdfs', index)}
@@ -524,6 +523,7 @@ export default function ContextoContemporaneoAdmin() {
                   onChange={(e) => handleArrayInputChange(index, 'Ppdfs', { archivo: e.target.files[0] })}
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
+                <small className="text-amber-600 font-medium mt-1">⚠️ Tamaño máximo: 10MB</small>
               </div>
 
               <div className="w-full">

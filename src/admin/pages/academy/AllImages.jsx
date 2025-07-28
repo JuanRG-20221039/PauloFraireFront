@@ -14,7 +14,6 @@ const AllImages = ({ loading, id }) => {
         const getImages = async () => {
             try {
                 const response = await clientAxios.get(`/image-activity/${id}`);
-                console.log(response);
                 setImages(response.data);
             } catch (error) {
                 console.log(error);

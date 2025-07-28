@@ -42,7 +42,6 @@ const AddNews = () => {
         date: '',
     });
 
-    console.log(blog);
 
     const [img, setImg] = useState([]);
 
@@ -82,7 +81,6 @@ const AddNews = () => {
             });
 
 
-            // console.log(response.data);
             setLoading(false);
 
             if (response.status === 200) {

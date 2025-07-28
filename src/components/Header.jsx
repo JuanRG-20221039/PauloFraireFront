@@ -27,14 +27,17 @@ const Header = () => {
     const fetchLogo = async () => {
       try {
         const { data } = await clientAxios.get("/logo");
-        setLogo(data.url || "sin logo"); // Fallback en caso de no haber logo
+        setLogo(data.url || logos[0]);
       } catch (error) {
-        console.error(error);
+        if (error.response?.status === 404) {
+          setLogo(logos[0]);
+        } else {
+          console.error("Error inesperado al obtener el logo:", error);
+          setLogo(logos[0]);
+        }
       }
     };
     fetchLogo();
-    const intervalId = setInterval(fetchLogo, 2000); // Llamar a fetchLogo cada 5 segundos
-    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -43,15 +46,12 @@ const Header = () => {
         const { data } = await clientAxios.get("/header-title");
         setTitle(
           data.title || "Centro Regional de Educación Superior Paulo Freire"
-        ); // Fallback en caso de no haber título
+        );
       } catch (error) {
         // console.error("Error al obtener el título:", error);
       }
     };
-
     fetchTitle();
-    const intervalId = setInterval(fetchTitle, 10000); // Llamar a fetchTitle cada 5 segundos
-    return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -98,7 +98,7 @@ const Header = () => {
                 })}
               </div>
             </div>
-            
+
             {toggle && (
               <motion.div
                 initial={{ x: -500, opacity: 0 }}
