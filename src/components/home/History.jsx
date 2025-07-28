@@ -20,7 +20,7 @@ const History = () => {
   useEffect(() => {
     const fetchIntroduction = async () => {
       try {
-        const { data } = await clientAxios.get("/stories");
+        const { data } = await clientAxios.get("/introduction");
         setIntro(data);
       } catch (error) {
         console.error("Error al obtener la introducción:", error);
