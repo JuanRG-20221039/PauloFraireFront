@@ -40,7 +40,7 @@ const HistoryDetail = () => {
   return (
     <div className="container mx-auto bg-gray-50">
       <div className="max-w-5xl mx-auto mt-20 p-5">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6">
           <div className="md:col-span-3">
             {stories.map((story) => (
               <div key={story._id || story.title} className="mb-20">
@@ -66,7 +66,8 @@ const HistoryDetail = () => {
                 )}
 
                 {/* Mostrar párrafos */}
-                <div className="my-10 text-lg max-w-5xl mx-auto leading-relaxed text-slate-500">
+                <div className="mt-3 max-w-5xl mx-auto text-lg leading-relaxed mb-5 text-slate-500 break-words overflow-wrap-break-word">
+                  {" "}
                   {story.paragraphs.map((para, index) => (
                     <p key={index} className="mb-4">
                       {para}

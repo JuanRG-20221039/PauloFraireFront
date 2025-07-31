@@ -130,10 +130,12 @@ const HistoriaCultura = () => {
   };
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">
-        Introducción Historia y Cultura
-      </h2>
-
+      <h1 className="text-center text-3xl font-bold text-slate-600 mt-10">
+        Historia y Cultura
+      </h1>
+      <p className="text-center my-4 mx-2">
+        Aquí puedes gestionar información sobre historia y cultura
+      </p>
       {intro ? (
         <div className="">
           <table className="w-full border border-gray-300 text-sm table-auto">
@@ -248,14 +250,14 @@ const HistoriaCultura = () => {
           <div className="flex gap-4 mt-4">
             <button
               type="submit"
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              className="bg-green-900 text-white px-4 py-2 rounded hover:bg-green-800"
             >
               {intro ? "Actualizar" : "Crear"} Introducción
             </button>
             <button
               type="button"
               onClick={handleCancel}
-              className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+              className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600"
             >
               Cancelar edición
             </button>
@@ -263,7 +265,6 @@ const HistoriaCultura = () => {
         </form>
       )}
       <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-4">Historias</h2>
         <CrudHistorias />
       </div>
     </div>
