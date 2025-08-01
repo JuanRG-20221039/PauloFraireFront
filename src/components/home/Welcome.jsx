@@ -25,23 +25,23 @@ const Welcome = () => {
   }, []);
 
   return (
-    <div className="mt-5 bg-gray-200">
-      <div className="grid grid-cols-1 overflow-hidden  lg:grid-cols-2">
-        <div className="md:col-span-1 border-solid border-white  space-y-5 flex flex-col justify-center items-center bg-hero">
-          <div className="text-xl w-full uppercase tracking-wide bg-slate-100 justify-center">
-            <img src={logos[4]} alt="Logo principal" className="h-6/6" />
+    <div className="mt-5 bg-gray-200 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-2">
+        <div className="md:col-span-1 border-solid border-white space-y-5 flex flex-col justify-center items-center bg-hero overflow-hidden">
+          <div className="text-xl w-full uppercase tracking-wide bg-slate-100 justify-center flex items-center">
+            <img src={logos[4]} alt="Logo principal" className="h-24 w-auto" />
           </div>
           {contenido?.videoUrl ? (
             <video
               src={contenido.videoUrl}
               controls
-              className="w-[600px] h-[500px] rounded-lg shadow-lg"
+              className="w-full max-w-[600px] h-[500px] rounded-lg shadow-lg object-contain"
             />
           ) : (
             <p className="text-white">No se encontró video institucional.</p>
           )}
         </div>
-        <div className="p-10">
+        <div className="p-10 max-w-full">
           {loading ? (
             <p>Cargando contenido...</p>
           ) : error ? (
@@ -59,11 +59,11 @@ const Welcome = () => {
                     className="flex items-center mb-4"
                     id={`seccion-${i}`}
                   >
-                    <div>
+                    <div className="w-full">
                       <h2 className="font-bold text-xl">
                         {contenido[`subtitulo${i}`]}
                       </h2>
-                      <p className="leading-relaxed mt-5 text-lg text-justify">
+                      <p className="leading-relaxed mt-5 text-lg text-justify break-words max-w-prose">
                         {contenido[`contenido${i}`]}
                       </p>
                     </div>
