@@ -16,7 +16,6 @@ const QuienesSomos = () => {
     contenido3: "",
     subtitulo4: "",
     contenido4: "",
-    videoTitulo: "",
   });
 
   const [videoFile, setVideoFile] = useState(null);
@@ -104,8 +103,7 @@ const QuienesSomos = () => {
       !form.subtitulo3.trim() ||
       !form.contenido3.trim() ||
       !form.subtitulo4.trim() ||
-      !form.contenido4.trim() ||
-      !form.videoTitulo.trim()
+      !form.contenido4.trim()
     ) {
       Swal.fire(
         "Campos incompletos",
@@ -209,7 +207,6 @@ const QuienesSomos = () => {
           contenido3: "",
           subtitulo4: "",
           contenido4: "",
-          videoTitulo: "",
         });
       } catch (err) {
         console.error("❌ Error al eliminar institucional:", err);
