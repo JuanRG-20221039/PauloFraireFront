@@ -45,7 +45,8 @@ import Becas from "./admin/pages/beca/Becas.jsx";
 import AddBeca from "./admin/pages/beca/AddBeca.jsx";
 import EditBeca from "./admin/pages/beca/EditBeca.jsx";
 import ModeloPredictivo from "./admin/pages/ModeloPredictivo.jsx";
-
+import QuienesSomos from "./admin/pages/QuienesSomos/QuienesSomos.jsx";
+import HistoriaCultura from "./admin/pages/historiaCultura/HistoriaCultura.jsx";
 // Configuración de la empresa
 import Empresa from "./admin/pages/Empresa/Configempresa.jsx";
 
@@ -86,6 +87,7 @@ const router = createBrowserRouter([
       { path: "/olvide-password", element: <Recuperar /> },
       { path: "/acercade", element: <Acercade /> },
       { path: "/contacto", element: <Contacto /> },
+
       { path: "/error-500", element: <ErrorPage500 /> },
       { path: "/error-400", element: <ErrorPage400 /> },
       { path: "*", element: <ErrorPage404 /> }, // Ruta explícita para errores 404
@@ -120,10 +122,13 @@ const router = createBrowserRouter([
       { path: "/admin/ofertaeducativa", element: <OfertaEducativa /> },
       { path: "/admin/add-oferta", element: <AddOfertaEducativa /> },
       { path: "/admin/edit-oferta/:id", element: <EditOfertaEducativa /> },
-      { path: "/admin/modelopredictivo", element: <ModeloPredictivo />},
+      { path: "/admin/modelopredictivo", element: <ModeloPredictivo /> },
       { path: "/admin/becas", element: <Becas /> },
-        { path: "/admin/add-beca", element: <AddBeca /> },
-        { path: "/admin/edit-beca/:id", element: <EditBeca /> },
+      { path: "/admin/add-beca", element: <AddBeca /> },
+      { path: "/admin/edit-beca/:id", element: <EditBeca /> },
+      { path: "/admin/quienesSomos", element: <QuienesSomos /> },
+      { path: "/admin/historiacultura", element: <HistoriaCultura /> },
+
       {
         path: "/admin/contexto-contemporaneo-admin",
         element: <ContextContemporaneoAdmin />,
