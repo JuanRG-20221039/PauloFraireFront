@@ -46,6 +46,8 @@ import AddBeca from "./admin/pages/beca/AddBeca.jsx";
 import EditBeca from "./admin/pages/beca/EditBeca.jsx";
 import QuienesSomos from "./admin/pages/QuienesSomos/QuienesSomos.jsx";
 import HistoriaCultura from "./admin/pages/historiaCultura/HistoriaCultura.jsx";
+import AddEventos from "./admin/pages/Eventos/AddEventos.jsx";
+
 // Configuración de la empresa
 import Empresa from "./admin/pages/Empresa/Configempresa.jsx";
 
@@ -126,6 +128,7 @@ const router = createBrowserRouter([
       { path: "/admin/edit-beca/:id", element: <EditBeca /> },
       { path: "/admin/quienesSomos", element: <QuienesSomos /> },
       { path: "/admin/historiacultura", element: <HistoriaCultura /> },
+      { path: "/admin/add-evento", element: <AddEventos /> },
 
       {
         path: "/admin/contexto-contemporaneo-admin",

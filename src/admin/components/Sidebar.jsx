@@ -23,6 +23,11 @@ const adminNavItems = [
     label: "Inicio",
   },
   {
+    to: "/admin/users",
+    icon: <SiGoogleclassroom className="text-2xl" />,
+    label: "Usuarios",
+  },
+  {
     to: "/admin/news",
     icon: <FaNewspaper className="text-2xl" />,
     label: "Noticias",
@@ -38,11 +43,6 @@ const adminNavItems = [
     label: "Contexto Contemporáneo",
   },
   {
-    to: "/admin/users",
-    icon: <SiGoogleclassroom className="text-2xl" />,
-    label: "Usuarios",
-  },
-  {
     to: "/admin/ofertaeducativa",
     icon: <SiInstructure className="text-2xl" />,
     label: "Oferta Educativa",
@@ -53,6 +53,26 @@ const adminNavItems = [
     label: "Becas",
   },
   {
+    to: "/admin/historiacultura",
+    icon: <FaLandmark className="text-2xl" />,
+    label: "Historia y Cultura",
+  },
+  {
+    to: "/admin/add-evento",
+    icon: <AiFillAlert className="text-2xl" />,
+    label: "Eventos",
+  },
+  {
+    to: "/admin/QuienesSomos",
+    icon: <FaUsers className="text-2xl" />,
+    label: "Quienes somos",
+  },
+  {
+    to: "/admin/configempresa",
+    icon: <FaCog className="text-2xl" />,
+    label: "Configuración datos de la empresa",
+  },
+  {
     to: "/admin/about",
     icon: <FaBook className="text-2xl" />,
     label: "Acerca de",
@@ -61,21 +81,6 @@ const adminNavItems = [
       { to: "/admin/about/terminos", label: "Términos y condiciones" },
       { to: "/admin/about/politicas", label: "Políticas de privacidad" },
     ],
-  },
-  {
-    to: "/admin/configempresa",
-    icon: <FaCog className="text-2xl" />,
-    label: "Configuración datos de la empresa",
-  },
-  {
-    to: "/admin/QuienesSomos",
-    icon: <FaUsers className="text-2xl" />,
-    label: "Quienes somos",
-  },
-  {
-    to: "/admin/historiacultura",
-    icon: <FaLandmark className="text-2xl" />,
-    label: "Historia y Cultura",
   },
 ];
 
