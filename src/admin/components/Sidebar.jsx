@@ -1,11 +1,18 @@
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { FaNewspaper, FaAngleDoubleDown, FaCog, FaBook } from "react-icons/fa";
+import {
+  FaNewspaper,
+  FaAngleDoubleDown,
+  FaCog,
+  FaBook,
+  FaUsers,
+  FaLandmark,
+} from "react-icons/fa";
 import { TiThMenuOutline } from "react-icons/ti";
 import { BiHomeAlt, BiSelectMultiple } from "react-icons/bi";
 import { SiGoogleclassroom, SiInstructure } from "react-icons/si";
 import { GiThink } from "react-icons/gi";
-import { AiFillDollarCircle } from "react-icons/ai";
+import { AiFillAlert, AiFillDollarCircle } from "react-icons/ai";
 import { TbLogin } from "react-icons/tb";
 import useAuth from "../../hooks/useAuth";
 
@@ -14,6 +21,11 @@ const adminNavItems = [
     to: "/admin/home",
     icon: <BiHomeAlt className="text-2xl" />,
     label: "Inicio",
+  },
+  {
+    to: "/admin/users",
+    icon: <SiGoogleclassroom className="text-2xl" />,
+    label: "Usuarios",
   },
   {
     to: "/admin/news",
@@ -31,11 +43,6 @@ const adminNavItems = [
     label: "Contexto Contemporáneo",
   },
   {
-    to: "/admin/users",
-    icon: <SiGoogleclassroom className="text-2xl" />,
-    label: "Usuarios",
-  },
-  {
     to: "/admin/ofertaeducativa",
     icon: <SiInstructure className="text-2xl" />,
     label: "Oferta Educativa",
@@ -46,6 +53,26 @@ const adminNavItems = [
     label: "Becas",
   },
   {
+    to: "/admin/historiacultura",
+    icon: <FaLandmark className="text-2xl" />,
+    label: "Historia y Cultura",
+  },
+  {
+    to: "/admin/add-evento",
+    icon: <AiFillAlert className="text-2xl" />,
+    label: "Eventos",
+  },
+  {
+    to: "/admin/QuienesSomos",
+    icon: <FaUsers className="text-2xl" />,
+    label: "Quienes somos",
+  },
+  {
+    to: "/admin/configempresa",
+    icon: <FaCog className="text-2xl" />,
+    label: "Configuración datos de la empresa",
+  },
+  {
     to: "/admin/about",
     icon: <FaBook className="text-2xl" />,
     label: "Acerca de",
@@ -54,11 +81,6 @@ const adminNavItems = [
       { to: "/admin/about/terminos", label: "Términos y condiciones" },
       { to: "/admin/about/politicas", label: "Políticas de privacidad" },
     ],
-  },
-  {
-    to: "/admin/configempresa",
-    icon: <FaCog className="text-2xl" />,
-    label: "Configuración datos de la empresa",
   },
 ];
 
@@ -77,9 +99,12 @@ const SideBar = () => {
     
     // Filtrar elementos del menú según el rol
     if (userRole === 2) { // Si es editor
-      // Excluir los módulos de Usuarios y Configuración datos de la empresa
+      // Excluir los módulos de Usuarios, Configuración datos de la empresa, Quienes somos y About
       const filtered = adminNavItems.filter(item => 
-        item.to !== "/admin/users" && item.to !== "/admin/configempresa"
+        item.to !== "/admin/users" && 
+        item.to !== "/admin/configempresa" &&
+        item.to !== "/admin/QuienesSomos" &&
+        item.to !== "/admin/about"
       );
       setFilteredNavItems(filtered);
     } else {
@@ -194,9 +219,7 @@ const SideBar = () => {
                       to={subItem.to}
                     >
                       <span
-                        className={`${
-                          !open ? "hidden" : "block"
-                        } duration-200`}
+                        className={`${!open ? "hidden" : "block"} duration-200`}
                       >
                         {subItem.label}
                       </span>
