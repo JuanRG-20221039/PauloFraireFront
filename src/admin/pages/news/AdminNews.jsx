@@ -117,7 +117,7 @@ const AdminNews = () => {
                                         <td colSpan="5" className="text-sm text-gray-600 mt-2">No hay noticias</td>
                                     </tr>
                                 ) : (
-                                    blogs.map((blog, index) => (
+                                    blogs.slice().reverse().map((blog, index) => (
                                         <tr key={index}>
                                             <td className="px-2 py-2 border text-center">
                                                 {index + 1}
