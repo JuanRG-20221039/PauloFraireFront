@@ -1,45 +1,66 @@
 import React, { useEffect, useState } from 'react';
 import { logos } from "../../data/Data";
 import clientAxios from '../../config/clientAxios';
-import inscripciones2025 from '../../assets/img/inscripciones2025.jpeg';
 
 const Hero = () => {
   const [images, setImages] = useState([]);
-  const [currentImage, setCurrentImage] = useState(inscripciones2025);
-  const [isFirstImage, setIsFirstImage] = useState(true);
+  const [currentImage, setCurrentImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const getHero = async () => {
       try {
         const response = await clientAxios.get('/customsize');
         const imagenes = response.data.map(item => item.slideImg);
+
+        // Precargar imágenes antes de mostrarlas
+        await Promise.all(
+          imagenes.map(src => {
+            return new Promise((resolve, reject) => {
+              const img = new Image();
+              img.src = src;
+              img.onload = resolve;
+              img.onerror = reject;
+            });
+          })
+        );
+
         setImages(imagenes);
+        setCurrentImage(imagenes[0] || null);
+        setIsLoading(false);
       } catch (error) {
-        console.log(error);
+        console.error(error);
+        setIsLoading(false);
       }
     };
+
     getHero();
   }, []);
 
   useEffect(() => {
+    if (images.length === 0) return;
+
     const interval = setInterval(() => {
-      if (isFirstImage && images.length > 0) {
-        setCurrentImage(images[0]);
-        setIsFirstImage(false);
-      } else {
-        const index = images.indexOf(currentImage);
-        setCurrentImage(images[(index + 1) % images.length]);
-      }
+      const index = images.indexOf(currentImage);
+      setCurrentImage(images[(index + 1) % images.length]);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [currentImage, images, isFirstImage]);
+  }, [currentImage, images]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-[500px] flex justify-center items-center">
+        <p className="text-xl font-semibold">Cargando imágenes...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full mx-auto home bg-gradient-to-t to-green-100 from-white py-16 -mb-32">
       <div className="md:flex items-center justify-center">
         <div className='flex-1 basis-[20rem]'>
-          <div className="flex justify-center space-y-5 flex-col items-center sm:flex-row mx-auto p-4 item gap-4">
+          <div className="flex justify-center space-y-5 flex-col items-center sm:flex-row mx-auto p-4 gap-4">
             <img src={logos[0]} className='w-40' loading='lazy' />
           </div>
           <div className="text-center">
@@ -82,7 +103,13 @@ const Hero = () => {
           </div>
         </div>
         <div className="flex flex-1 basis-[20rem] justify-center items-center mt-2 animate-fade lg:mx-4 sm:mx-8">
-          {currentImage && <img src={currentImage} alt="imagen hero" className='w-[800px] h-[500px] sm:w-[600px] sm:h-[400px] xs:w-[400px] xs:h-[300px] object-cover object-top shadow-sm rounded-sm' />}
+          {currentImage && (
+            <img
+              src={currentImage}
+              alt="imagen hero"
+              className='w-[800px] h-[500px] sm:w-[600px] sm:h-[400px] xs:w-[400px] xs:h-[300px] object-cover object-top shadow-sm rounded-sm'
+            />
+          )}
         </div>
       </div>
     </div>
