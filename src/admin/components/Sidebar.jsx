@@ -99,9 +99,12 @@ const SideBar = () => {
     
     // Filtrar elementos del menú según el rol
     if (userRole === 2) { // Si es editor
-      // Excluir los módulos de Usuarios y Configuración datos de la empresa
+      // Excluir los módulos de Usuarios, Configuración datos de la empresa, Quienes somos y About
       const filtered = adminNavItems.filter(item => 
-        item.to !== "/admin/users" && item.to !== "/admin/configempresa"
+        item.to !== "/admin/users" && 
+        item.to !== "/admin/configempresa" &&
+        item.to !== "/admin/QuienesSomos" &&
+        item.to !== "/admin/about"
       );
       setFilteredNavItems(filtered);
     } else {
