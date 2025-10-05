@@ -28,6 +28,16 @@ export default defineConfig({
             type: "image/png",
             sizes: "512x512",
           },
+          {
+            src: "/images/logo96.png",
+            type: "image/png",
+            sizes: "96x96",
+          },
+          {
+            src: "/images/logo180.png",
+            type: "image/png",
+            sizes: "180x180",
+          },
         ],
         id: "/?source=pwa",
         start_url: "/?source=pwa",
