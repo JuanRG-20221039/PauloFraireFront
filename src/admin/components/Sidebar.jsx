@@ -53,11 +53,6 @@ const adminNavItems = [
     label: "Becas",
   },
   {
-    to: "/admin/modelopredictivo",
-    icon: <AiFillAlert className="text-2xl" />,
-    label: "Predicción de Estudiantes",
-  },
-  {
     to: "/admin/about",
     icon: <FaBook className="text-2xl" />,
     label: "Acerca de",

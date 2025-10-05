@@ -44,7 +44,6 @@ import EditOfertaEducativa from "./admin/pages/ofertaseducativas/EditOfertaEduca
 import Becas from "./admin/pages/beca/Becas.jsx";
 import AddBeca from "./admin/pages/beca/AddBeca.jsx";
 import EditBeca from "./admin/pages/beca/EditBeca.jsx";
-import ModeloPredictivo from "./admin/pages/ModeloPredictivo.jsx";
 import QuienesSomos from "./admin/pages/QuienesSomos/QuienesSomos.jsx";
 import HistoriaCultura from "./admin/pages/historiaCultura/HistoriaCultura.jsx";
 // Configuración de la empresa
@@ -122,7 +121,6 @@ const router = createBrowserRouter([
       { path: "/admin/ofertaeducativa", element: <OfertaEducativa /> },
       { path: "/admin/add-oferta", element: <AddOfertaEducativa /> },
       { path: "/admin/edit-oferta/:id", element: <EditOfertaEducativa /> },
-      { path: "/admin/modelopredictivo", element: <ModeloPredictivo /> },
       { path: "/admin/becas", element: <Becas /> },
       { path: "/admin/add-beca", element: <AddBeca /> },
       { path: "/admin/edit-beca/:id", element: <EditBeca /> },

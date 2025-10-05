@@ -12,7 +12,7 @@ const Header = () => {
   const [active, setActive] = useState(true);
   const [logo, setLogo] = useState("");
   const [title, setTitle] = useState(
-    "Centro Regional de Educación Superior Paulo Freire"
+    "Sin título..."
   ); // Estado para el título dinámico con valor por defecto
 
   useEffect(() => {
@@ -91,8 +91,8 @@ const Header = () => {
                 onClick={() => setToggle(true)}
               />
             </div>
-            <div className="flex">
-              <div className="sm:flex justify-end hidden">
+            <div className="flex-1 flex justify-center">
+              <div className="sm:flex hidden">
                 {navLinks.map((navLink) => {
                   return <NavLink key={navLink.id} {...navLink} />;
                 })}
