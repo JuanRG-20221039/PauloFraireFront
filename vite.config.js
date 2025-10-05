@@ -14,11 +14,6 @@ export default defineConfig({
         name: "Centro Regional de Educación Superior Paulo Freire",
         icons: [
           {
-            src: "/images/logo512.svg",
-            type: "image/svg+xml",
-            sizes: "512x512",
-          },
-          {
             src: "/images/logo192.png",
             type: "image/png",
             sizes: "192x192",
@@ -29,16 +24,22 @@ export default defineConfig({
             sizes: "512x512",
           },
           {
+            src: "/images/logo180.png",
+            type: "image/png",
+            sizes: "180x180",
+          },
+          {
             src: "/images/logo96.png",
             type: "image/png",
             sizes: "96x96",
           },
           {
-            src: "/images/logo180.png",
-            type: "image/png",
-            sizes: "180x180",
+            src: "/images/logo512.svg",
+            type: "image/svg+xml",
+            sizes: "512x512",
           },
         ],
+
         id: "/?source=pwa",
         start_url: "/?source=pwa",
         background_color: "#CCE6CC",
