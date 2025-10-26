@@ -57,6 +57,7 @@ import ContextContemporaneo from "./contexto-comtemporaneo/ContextContemporaneo.
 // User
 import UserLayout from "./user/pages/UserLayout.jsx";
 import UserProfile from "./user/pages/UserProfile.jsx";
+import Ligros from "./user/pages/gamificacion/libros.jsx";
 import Politicas from "./admin/pages/about/Politicas.tsx";
 
 // ErrorPage
@@ -148,7 +149,9 @@ const router = createBrowserRouter([
     ),
     errorElement: <ErrorHandler />, // Manejo de errores para rutas de usuario
     children: [
+      { index: true, element: <UserProfile /> },
       { path: "/user/profile", element: <UserProfile /> },
+      { path: "/user/libros", element: <Ligros /> },
       { path: "*", element: <ErrorPage404 /> }, // Ruta explícita para errores 404
     ],
   },

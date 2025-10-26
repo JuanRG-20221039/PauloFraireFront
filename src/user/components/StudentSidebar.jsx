@@ -5,22 +5,22 @@ import { IoDocumentText } from "react-icons/io5";
 import { TbLogin } from "react-icons/tb";
 
 const studentNavItems = [
-  { to: "/", icon: <BiHomeAlt className="text-2xl" />, label: "Inicio" },
+  /*   { to: "/", icon: <BiHomeAlt className="text-2xl" />, label: "Inicio" }, */
   {
     to: "/user/profile",
     icon: <BiSelectMultiple className="text-2xl" />,
     label: "Mi perfil",
   },
   {
-    to: "/user/offers",
+    to: "/user/libros",
     icon: <BiSelectMultiple className="text-2xl" />,
-    label: "Ofertas educativas",
+    label: "Libros",
   },
-  {
+  /*   {
     to: "/user/docs",
     icon: <IoDocumentText className="text-2xl" />,
     label: "Mis documentos",
-  },
+  }, */
 ];
 
 const StudentSidebar = () => {
