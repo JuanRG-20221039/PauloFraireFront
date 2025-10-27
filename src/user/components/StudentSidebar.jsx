@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { BiHomeAlt, BiSelectMultiple } from "react-icons/bi";
+import { BiSelectMultiple } from "react-icons/bi";
 import { IoDocumentText } from "react-icons/io5";
 import { TbLogin } from "react-icons/tb";
 
 const studentNavItems = [
-  /*   { to: "/", icon: <BiHomeAlt className="text-2xl" />, label: "Inicio" }, */
   {
     to: "/user/profile",
     icon: <BiSelectMultiple className="text-2xl" />,
@@ -16,11 +15,7 @@ const studentNavItems = [
     icon: <BiSelectMultiple className="text-2xl" />,
     label: "Libros",
   },
-  /*   {
-    to: "/user/docs",
-    icon: <IoDocumentText className="text-2xl" />,
-    label: "Mis documentos",
-  }, */
+  /* { to: "/user/docs", icon: <IoDocumentText className="text-2xl" />, label: "Mis documentos" }, */
 ];
 
 const StudentSidebar = () => {
@@ -34,7 +29,7 @@ const StudentSidebar = () => {
 
   return (
     <div
-      className={`${
+      className={`$${
         open ? "w-72 overflow-y-auto" : "w-[90px] overflow-auto"
       } p-5 md:block hidden pt-8 relative duration-300 shadow-xl bg-slate-200`}
     >
@@ -42,7 +37,7 @@ const StudentSidebar = () => {
         <div
           onClick={() => setOpen(!open)}
           className={`cursor-pointer h-6 w-6 duration-500 ${
-            open && "rotate-[360deg]"
+            open ? "rotate-[360deg]" : ""
           }`}
         >
           <svg
@@ -59,9 +54,10 @@ const StudentSidebar = () => {
             />
           </svg>
         </div>
+
         <h1
           className={`text-slate-700 cursor-pointer font-bold origin-left duration-200 ${
-            !open && "scale-0"
+            !open ? "scale-0" : ""
           }`}
         >
           Alumno
@@ -71,20 +67,24 @@ const StudentSidebar = () => {
       <ul className="pt-6">
         <p
           className={`text-gray-600 ${
-            !open && "hidden"
+            !open ? "hidden" : ""
           } text-sm text-center mb-2`}
         >
           Menu
         </p>
+
         {studentNavItems.map((item, index) => (
           <li key={index} className="space-y-2">
             <NavLink
+              to={item.to}
               className={({ isActive }) =>
                 `flex items-center gap-2 ${
                   isActive ? "bg-yellow-400 text-black" : "text-[#413f44]"
                 } duration-150 rounded-md p-2 cursor-pointer hover:bg-Teal hover:text-white font-bold text-sm`
               }
-              to={item.to}
+              onClick={() =>
+                console.log("StudentSidebar: navigate to", item.to)
+              }
             >
               {item.icon}
               <span className={`${!open ? "hidden" : "block"} duration-200`}>
