@@ -61,6 +61,7 @@ import ContextContemporaneo from "./contexto-comtemporaneo/ContextContemporaneo.
 import UserLayout from "./user/pages/UserLayout.jsx";
 import UserProfile from "./user/pages/UserProfile.jsx";
 import Libros from "./user/pages/gamificacion/Libros.jsx";
+import Insignias from "./user/pages/gamificacion/Insignias.jsx";
 import Politicas from "./admin/pages/about/Politicas.tsx";
 
 // ErrorPage
@@ -162,6 +163,7 @@ const router = createBrowserRouter([
       { index: true, element: <UserProfile /> },
       { path: "profile", element: <UserProfile /> },
       { path: "/user/libros", element: <Libros /> },
+      { path: "/user/insignias", element: <Insignias /> },
       { path: "*", element: <ErrorPage404 /> }, // Ruta explícita para errores 404
     ],
   },

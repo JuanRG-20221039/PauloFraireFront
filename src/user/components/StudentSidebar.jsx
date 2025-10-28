@@ -15,7 +15,11 @@ const studentNavItems = [
     icon: <BiSelectMultiple className="text-2xl" />,
     label: "Libros",
   },
-  /* { to: "/user/docs", icon: <IoDocumentText className="text-2xl" />, label: "Mis documentos" }, */
+  {
+    to: "/user/insignias",
+    icon: <IoDocumentText className="text-2xl" />,
+    label: "Insignias",
+  },
 ];
 
 const StudentSidebar = () => {
