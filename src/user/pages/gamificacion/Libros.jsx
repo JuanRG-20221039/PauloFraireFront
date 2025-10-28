@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 const API = "http://localhost:8000";
@@ -7,24 +7,35 @@ const Libros = () => {
   const [libros, setLibros] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Visor
   const [viewer, setViewer] = useState({ url: "", titulo: "", id: "" });
+
+  // Quiz (config del libro)
   const [showQuiz, setShowQuiz] = useState(false);
+  const [quizConfig, setQuizConfig] = useState({
+    hasQuiz: false,
+    questions: [],
+    badgeIcon: "🏆",
+    badgeName: "Guerrero Lector",
+    badgeDescription:
+      "Insignia otorgada por completar el cuestionario perfectamente",
+  });
+
+  // Progreso
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [score, setScore] = useState(0);
+
+  // Insignias del usuario
   const [showBadgeModal, setShowBadgeModal] = useState(false);
   const [userBadges, setUserBadges] = useState([]);
-  const location = useLocation();
 
-  // Pregunta del cuestionario (solo 1 para prueba)
-  const quizQuestions = [
-    {
-      question: "¿Cuál es el tema principal del documento?",
-      options: ["Gramática inglesa", "Matemáticas", "Historia", "Ciencias"],
-      correct: 0,
-    },
-  ];
+  // Cache opcional de configs por libro (para mostrar cuando no hay UserBadge)
+  const [badgeConfigsCache, setBadgeConfigsCache] = useState({});
+
+  const location = useLocation();
 
   // Cargar libros
   useEffect(() => {
@@ -39,47 +50,66 @@ const Libros = () => {
         setLoading(false);
       }
     };
-
     fetchLibros();
   }, [location.pathname]);
 
-  // Cargar insignias del usuario
+  // Cargar insignias del usuario desde BD
   useEffect(() => {
     const fetchUserBadges = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return;
+      const tokenRaw = localStorage.getItem("token");
+      if (!tokenRaw) return;
+
+      let jwt = null;
+      try {
+        const parsed = JSON.parse(tokenRaw);
+        jwt = parsed?.token || null;
+      } catch {
+        jwt = tokenRaw && tokenRaw.split(".").length === 3 ? tokenRaw : null;
+      }
+      if (!jwt) return;
 
       try {
         const response = await fetch(`${API}/api/badges`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${jwt}` },
         });
-
         if (response.ok) {
           const data = await response.json();
-          setUserBadges(data);
+          setUserBadges(Array.isArray(data) ? data : []);
         }
       } catch (err) {
         console.error("Error al cargar insignias:", err);
       }
     };
-
     fetchUserBadges();
   }, []);
 
-  // Verificar si el usuario tiene insignia para un libro
-  const hasBadgeForBook = (libroId) => {
-    return userBadges.some(
-      (badge) => badge.libroId === libroId || badge.libroId._id === libroId
-    );
-  };
+  // Mapa libroId -> UserBadge
+  const badgesMap = useMemo(() => {
+    const map = {};
+    (userBadges || []).forEach((b) => {
+      const bid = typeof b.libroId === "string" ? b.libroId : b.libroId?._id;
+      if (bid) map[bid] = b;
+    });
+    return map;
+  }, [userBadges]);
 
-  // Guardar insignia en BD
+  // Guardar insignia al aprobar con score perfecto
   const saveBadge = async (libroId) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const tokenRaw = localStorage.getItem("token");
+    if (!tokenRaw) {
       alert("Debes iniciar sesión para guardar tu insignia");
+      return;
+    }
+
+    let jwt = null;
+    try {
+      const parsed = JSON.parse(tokenRaw);
+      jwt = parsed?.token || null;
+    } catch {
+      jwt = tokenRaw && tokenRaw.split(".").length === 3 ? tokenRaw : null;
+    }
+    if (!jwt) {
+      alert("No fue posible validar la sesión");
       return;
     }
 
@@ -88,34 +118,77 @@ const Libros = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${jwt}`,
         },
         body: JSON.stringify({
           libroId,
-          badgeName: "Guerrero Lector",
+          badgeName: quizConfig.badgeName || "Guerrero Lector",
           badgeDescription:
-            "Insignia otorgada a los verdaderos Guerreros Lectores que han demostrado su dedicación",
-          score: 1,
+            quizConfig.badgeDescription ||
+            "Insignia otorgada por completar el cuestionario perfectamente",
+          score: quizConfig.questions.length, // perfecto
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setUserBadges([...userBadges, data.badge]);
-        console.log("Insignia guardada exitosamente");
+        // Reflejar inmediatamente la insignia ganada desde BD (incluye badgeIcon)
+        setUserBadges((prev) => [...prev, data.badge]);
       } else {
         const errorData = await response.json();
-        console.log(errorData.message);
+        console.log(errorData.message || "No fue posible guardar la insignia");
       }
     } catch (error) {
       console.error("Error al guardar insignia:", error);
     }
   };
 
+  // Abrir libro y cargar configuración del cuestionario
   const handleLeerMas = async (libro) => {
     const id = libro?._id || libro?.id;
     if (!id) return alert("No se encontró el ID del libro");
 
+    try {
+      const cfgRes = await fetch(`${API}/api/badge-config/${id}`);
+      if (cfgRes.ok) {
+        const cfgJson = await cfgRes.json();
+        if (cfgJson?.hasConfig && cfgJson.badgeConfig) {
+          const { hasQuiz, questions, badgeIcon, badgeName, badgeDescription } =
+            cfgJson.badgeConfig;
+
+          const cfg = {
+            hasQuiz: !!hasQuiz,
+            questions: Array.isArray(questions) ? questions : [],
+            badgeIcon: badgeIcon || "🏆",
+            badgeName: badgeName || "Guerrero Lector",
+            badgeDescription:
+              badgeDescription ||
+              "Insignia otorgada por completar el cuestionario perfectamente",
+          };
+
+          setQuizConfig(cfg);
+          setBadgeConfigsCache((prev) => ({
+            ...prev,
+            [id]: cfgJson.badgeConfig,
+          }));
+        } else {
+          setQuizConfig({
+            hasQuiz: false,
+            questions: [],
+            badgeIcon: "🏆",
+            badgeName: "Guerrero Lector",
+            badgeDescription:
+              "Insignia otorgada por completar el cuestionario perfectamente",
+          });
+        }
+      } else {
+        setQuizConfig((p) => ({ ...p, hasQuiz: false, questions: [] }));
+      }
+    } catch {
+      setQuizConfig((p) => ({ ...p, hasQuiz: false, questions: [] }));
+    }
+
+    // Abrir PDF
     try {
       const res = await fetch(`${API}/api/pdfs-cc/${id}`, {
         headers: { Accept: "application/pdf, application/json" },
@@ -140,11 +213,12 @@ const Libros = () => {
       } else {
         alert("Este libro no tiene PDF disponible");
       }
-    } catch (e) {
+    } catch {
       alert("No fue posible abrir el PDF");
     }
   };
 
+  // Reset visor
   const handleCerrar = () => {
     setViewer({ url: "", titulo: "", id: "" });
     setShowQuiz(false);
@@ -155,13 +229,23 @@ const Libros = () => {
     setShowBadgeModal(false);
   };
 
+  // Iniciar quiz
   const handleStartQuiz = () => {
+    if (!quizConfig.hasQuiz || quizConfig.questions.length === 0) {
+      alert("Este libro no tiene cuestionario disponible");
+      return;
+    }
     setShowQuiz(true);
     setCurrentQuestion(0);
     setAnswers([]);
     setQuizCompleted(false);
     setScore(0);
   };
+
+  const currentQ = useMemo(
+    () => quizConfig.questions[currentQuestion],
+    [quizConfig.questions, currentQuestion]
+  );
 
   const handleAnswerSelect = (answerIndex) => {
     const newAnswers = [...answers];
@@ -170,29 +254,26 @@ const Libros = () => {
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestion < quizQuestions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      let correctCount = 0;
-      quizQuestions.forEach((q, index) => {
-        if (answers[index] === q.correct) {
-          correctCount++;
-        }
-      });
-      setScore(correctCount);
-      setQuizCompleted(true);
+    const total = quizConfig.questions.length;
+    if (currentQuestion < total - 1) {
+      setCurrentQuestion((p) => p + 1);
+      return;
+    }
+    // Finalizar
+    let correctCount = 0;
+    quizConfig.questions.forEach((q, i) => {
+      if (answers[i] === q.correct) correctCount++;
+    });
+    setScore(correctCount);
+    setQuizCompleted(true);
 
-      // Si obtiene 1/1, guardar la insignia
-      if (correctCount === 1 && viewer.id) {
-        saveBadge(viewer.id);
-      }
+    if (correctCount === total && total > 0 && viewer.id) {
+      saveBadge(viewer.id);
     }
   };
 
   const handlePreviousQuestion = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
-    }
+    if (currentQuestion > 0) setCurrentQuestion((p) => p - 1);
   };
 
   const handleRestartQuiz = () => {
@@ -205,12 +286,16 @@ const Libros = () => {
   if (loading) return <div className="p-4">Cargando libros...</div>;
   if (error) return <div className="p-4 text-red-600">Error: {error}</div>;
 
-  // Si hay PDF abierto
+  // Visor con quiz
   if (viewer.url) {
+    const total = quizConfig.questions.length || 0;
+    const progressPct =
+      total > 0 ? Math.round(((currentQuestion + 1) / total) * 100) : 0;
+
     return (
       <>
         <div className="w-full h-full flex gap-4">
-          {/* Columna izquierda - Visor PDF */}
+          {/* PDF */}
           <div
             className={`flex flex-col ${
               showQuiz ? "w-2/3" : "w-full"
@@ -255,7 +340,7 @@ const Libros = () => {
             </div>
           </div>
 
-          {/* Columna derecha - Cuestionario */}
+          {/* Quiz */}
           {showQuiz && (
             <div className="w-1/3 bg-white rounded-lg shadow-xl p-6 overflow-y-auto h-[90vh]">
               <div className="flex justify-between items-center mb-4">
@@ -276,35 +361,27 @@ const Libros = () => {
                   <div className="mb-4">
                     <div className="flex justify-between text-sm text-gray-600 mb-2">
                       <span>
-                        Pregunta {currentQuestion + 1} de {quizQuestions.length}
+                        Pregunta {currentQuestion + 1} de{" "}
+                        {quizConfig.questions.length || 0}
                       </span>
-                      <span>
-                        {Math.round(
-                          ((currentQuestion + 1) / quizQuestions.length) * 100
-                        )}
-                        %
-                      </span>
+                      <span>{progressPct}%</span>
                     </div>
                     <div className="w-full h-2 bg-gray-200 rounded-full">
                       <div
                         className="h-full bg-blue-600 rounded-full transition-all"
-                        style={{
-                          width: `${
-                            ((currentQuestion + 1) / quizQuestions.length) * 100
-                          }%`,
-                        }}
+                        style={{ width: `${progressPct}%` }}
                       />
                     </div>
                   </div>
 
                   {/* Pregunta */}
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold mb-4">
-                      {quizQuestions[currentQuestion].question}
-                    </h4>
-                    <div className="space-y-3">
-                      {quizQuestions[currentQuestion].options.map(
-                        (option, index) => (
+                  {currentQ ? (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold mb-4">
+                        {currentQ.question}
+                      </h4>
+                      <div className="space-y-3">
+                        {currentQ.options.map((option, index) => (
                           <button
                             key={index}
                             className={`w-full text-left p-3 rounded-lg border-2 transition ${
@@ -319,12 +396,16 @@ const Libros = () => {
                             </span>{" "}
                             {option}
                           </button>
-                        )
-                      )}
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="text-gray-500">
+                      No hay preguntas disponibles.
+                    </div>
+                  )}
 
-                  {/* Botones de navegación */}
+                  {/* Navegación */}
                   <div className="flex justify-between gap-2">
                     <button
                       className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition disabled:opacity-50"
@@ -336,9 +417,13 @@ const Libros = () => {
                     <button
                       className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
                       onClick={handleNextQuestion}
-                      disabled={answers[currentQuestion] === undefined}
+                      disabled={
+                        quizConfig.questions.length === 0 ||
+                        answers[currentQuestion] === undefined
+                      }
                     >
-                      {currentQuestion === quizQuestions.length - 1
+                      {currentQuestion ===
+                      (quizConfig.questions.length || 0) - 1
                         ? "Finalizar"
                         : "Siguiente →"}
                     </button>
@@ -346,24 +431,19 @@ const Libros = () => {
                 </div>
               ) : (
                 <div className="text-center">
-                  {/* Resultados */}
-                  {score === 1 ? (
+                  {score === (quizConfig.questions.length || 0) &&
+                  (quizConfig.questions.length || 0) > 0 ? (
                     <div className="mb-6">
                       <div className="text-6xl mb-4 animate-bounce">🎉</div>
                       <h3 className="text-2xl font-bold text-green-600 mb-2">
                         ¡Felicidades!
                       </h3>
-                      <p className="text-gray-700 mb-4">
-                        Has respondido correctamente la pregunta. ¡Excelente
-                        trabajo!
-                      </p>
+                      <p className="text-gray-700 mb-4">Puntuación perfecta.</p>
                       <div className="bg-green-100 border-2 border-green-600 rounded-lg p-4 mb-4">
                         <p className="text-4xl font-bold text-green-600">
-                          {score}/1
+                          {score}/{quizConfig.questions.length || 0}
                         </p>
-                        <p className="text-sm text-gray-600">
-                          Puntuación perfecta
-                        </p>
+                        <p className="text-sm text-gray-600">¡Excelente!</p>
                       </div>
                     </div>
                   ) : (
@@ -373,20 +453,19 @@ const Libros = () => {
                         Sigue intentando
                       </h3>
                       <p className="text-gray-700 mb-4">
-                        Necesitas responder correctamente para aprobar.
+                        Necesitas responder correctamente todas.
                       </p>
                       <div className="bg-orange-100 border-2 border-orange-600 rounded-lg p-4 mb-4">
                         <p className="text-4xl font-bold text-orange-600">
-                          {score}/1
+                          {score}/{quizConfig.questions.length || 0}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Respuesta incorrecta
+                          Inténtalo de nuevo
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {/* Botones */}
                   <div className="space-y-2">
                     <button
                       className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
@@ -394,14 +473,15 @@ const Libros = () => {
                     >
                       Intentar de nuevo
                     </button>
-                    {score === 1 && (
-                      <button
-                        className="w-full px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-semibold"
-                        onClick={() => setShowBadgeModal(true)}
-                      >
-                        🏆 Ver Insignia
-                      </button>
-                    )}
+                    {score === (quizConfig.questions.length || 0) &&
+                      (quizConfig.questions.length || 0) > 0 && (
+                        <button
+                          className="w-full px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-semibold"
+                          onClick={() => setShowBadgeModal(true)}
+                        >
+                          🏆 Ver Insignia
+                        </button>
+                      )}
                     <button
                       className="w-full px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
                       onClick={() => setShowQuiz(false)}
@@ -426,27 +506,27 @@ const Libros = () => {
                 >
                   ✕
                 </button>
-                <div className="text-8xl mb-4 animate-pulse">🏆</div>
+                <div className="text-8xl mb-4 animate-pulse">
+                  {quizConfig.badgeIcon || "🏆"}
+                </div>
                 <h2 className="text-3xl font-bold text-yellow-600 mb-2">
                   ¡Insignia Desbloqueada!
                 </h2>
                 <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white py-3 px-6 rounded-lg mb-4 shadow-lg">
-                  <p className="text-xl font-bold">Guerrero Lector</p>
+                  <p className="text-xl font-bold">{quizConfig.badgeName}</p>
                 </div>
                 <p className="text-gray-700 mb-6 leading-relaxed">
-                  Felicidades, esta insignia es otorgada a los verdaderos{" "}
-                  <span className="font-bold text-yellow-600">
-                    Guerreros Lectores
-                  </span>{" "}
-                  que han demostrado su dedicación y conocimiento al completar
-                  perfectamente el cuestionario. ¡Sigue así!
+                  {quizConfig.badgeDescription}
                 </p>
                 <div className="bg-gray-100 rounded-lg p-4 mb-6">
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <p className="text-2xl font-bold text-green-600">1/1</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {quizConfig.questions.length}/
+                        {quizConfig.questions.length}
+                      </p>
                       <p className="text-sm text-gray-600">
-                        Respuesta correcta
+                        Respuestas correctas
                       </p>
                     </div>
                     <div>
@@ -469,7 +549,7 @@ const Libros = () => {
     );
   }
 
-  // Cuadrícula de libros con insignias
+  // Tarjetas
   if (!libros.length)
     return <div className="p-4 text-gray-600">No hay libros disponibles.</div>;
 
@@ -477,23 +557,28 @@ const Libros = () => {
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
       {libros.map((libro, index) => {
         const libroId = libro?._id || libro?.id;
-        const hasBadge = hasBadgeForBook(libroId);
+
+        // Insignia ganada por usuario (desde BD)
+        const userBadge = badgesMap[libroId];
+
+        // Config en cache (cuando no hay UserBadge)
+        const cfg = badgeConfigsCache[libroId];
+
+        // Decide qué icono/etiqueta mostrar
+        const iconToShow = userBadge?.badgeIcon || cfg?.badgeIcon || null;
+        const labelToShow = userBadge?.badgeName || cfg?.badgeName || null;
 
         return (
           <div
             key={libroId || index}
-            className="bg-white rounded-xl shadow-xl p-5 flex flex-col items-center hover:shadow-2xl transition relative"
+            className="bg-white rounded-xl shadow-xl p-5 flex flex-col hover:shadow-2xl transition"
           >
-            {/* Insignia en la esquina superior derecha */}
-            {hasBadge && (
-              <div className="absolute top-3 right-3 bg-yellow-400 rounded-full p-2 shadow-lg animate-pulse">
-                <span className="text-2xl">🏆</span>
-              </div>
-            )}
-
+            {/* Título */}
             <h3 className="text-lg font-bold text-blue-700 mb-2 text-center">
               {libro.nombre}
             </h3>
+
+            {/* Imagen */}
             {libro.imagen && (
               <img
                 src={libro.imagen}
@@ -501,19 +586,28 @@ const Libros = () => {
                 className="w-full h-48 object-cover rounded mb-4"
               />
             )}
+
+            {/* Descripción */}
             <p className="text-gray-600 mb-4 text-center">
               {libro.descripcion?.length > 200
                 ? `${libro.descripcion.slice(0, 200)}...`
                 : libro.descripcion}
             </p>
 
-            {/* Botón con insignia opcional */}
-            <div className="mt-auto w-full flex items-center justify-center gap-2">
+            {/* Pie: insignia (BD/config) a la izquierda, botón a la derecha */}
+            <div className="mt-auto w-full flex items-center justify-between">
+              {iconToShow ? (
+                <div className="flex items-center">
+                  <span className="text-2xl">{iconToShow}</span>
+                </div>
+              ) : (
+                <div />
+              )}
+
               <button
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition active:scale-95 flex items-center gap-2"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition active:scale-95"
                 onClick={() => handleLeerMas(libro)}
               >
-                {hasBadge && <span className="text-lg">🏆</span>}
                 Leer más
               </button>
             </div>
