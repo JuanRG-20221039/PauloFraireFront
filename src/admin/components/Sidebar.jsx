@@ -82,6 +82,11 @@ const adminNavItems = [
       { to: "/admin/about/politicas", label: "Políticas de privacidad" },
     ],
   },
+  {
+    to: "/admin/libros",
+    icon: <FaBook className="text-2xl" />,
+    label: "Lecturas",
+  },
 ];
 
 const SideBar = () => {
@@ -93,18 +98,20 @@ const SideBar = () => {
 
   useEffect(() => {
     // Obtener el rol del usuario desde localStorage
-    const userRole = localStorage.getItem("token") 
-      ? JSON.parse(localStorage.getItem("token")).role 
+    const userRole = localStorage.getItem("token")
+      ? JSON.parse(localStorage.getItem("token")).role
       : null;
-    
+
     // Filtrar elementos del menú según el rol
-    if (userRole === 2) { // Si es editor
+    if (userRole === 2) {
+      // Si es editor
       // Excluir los módulos de Usuarios, Configuración datos de la empresa, Quienes somos y About
-      const filtered = adminNavItems.filter(item => 
-        item.to !== "/admin/users" && 
-        item.to !== "/admin/configempresa" &&
-        item.to !== "/admin/QuienesSomos" &&
-        item.to !== "/admin/about"
+      const filtered = adminNavItems.filter(
+        (item) =>
+          item.to !== "/admin/users" &&
+          item.to !== "/admin/configempresa" &&
+          item.to !== "/admin/QuienesSomos" &&
+          item.to !== "/admin/about"
       );
       setFilteredNavItems(filtered);
     } else {

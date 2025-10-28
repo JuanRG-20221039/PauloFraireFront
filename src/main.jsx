@@ -47,6 +47,9 @@ import EditBeca from "./admin/pages/beca/EditBeca.jsx";
 import QuienesSomos from "./admin/pages/QuienesSomos/QuienesSomos.jsx";
 import HistoriaCultura from "./admin/pages/historiaCultura/HistoriaCultura.jsx";
 import AddEventos from "./admin/pages/Eventos/Eventos.jsx";
+import Lecturas from "./admin/pages/librosUsuarios/lecturas.jsx";
+import AgregarEditarLibro from "./admin/pages/librosUsuarios/AgregarEditarLibro.jsx";
+import GestionarCuestionario from "./admin/pages/librosUsuarios/GestionarCuestionario.jsx";
 
 // Configuración de la empresa
 import Empresa from "./admin/pages/Empresa/Configempresa.jsx";
@@ -130,6 +133,13 @@ const router = createBrowserRouter([
       { path: "/admin/quienesSomos", element: <QuienesSomos /> },
       { path: "/admin/historiacultura", element: <HistoriaCultura /> },
       { path: "/admin/add-evento", element: <AddEventos /> },
+      { path: "/admin/libros", element: <Lecturas /> },
+      { path: "/admin/lecturas/agregar", element: <AgregarEditarLibro /> },
+      { path: "/admin/lecturas/editar/:id", element: <AgregarEditarLibro /> },
+      {
+        path: "/admin/lecturas/cuestionario/:id",
+        element: <GestionarCuestionario />,
+      },
 
       {
         path: "/admin/contexto-contemporaneo-admin",
