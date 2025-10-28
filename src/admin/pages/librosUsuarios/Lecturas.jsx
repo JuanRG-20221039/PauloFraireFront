@@ -180,7 +180,7 @@ const Lecturas = () => {
           </p>
         </div>
         <Link
-          to="/admin/libros/agregar"
+          to="/admin/lecturas/agregar"
           className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition shadow-lg font-semibold flex items-center gap-2"
         >
           <span className="text-xl">+</span>
@@ -305,7 +305,7 @@ const Lecturas = () => {
                   <div className="flex flex-col gap-2">
                     <div className="flex gap-2">
                       <Link
-                        to={`/admin/libros/editar/${libro._id}`}
+                        to={`/admin/lecturas/editar/${libro._id}`}
                         className="flex-1 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition text-center font-semibold"
                       >
                         ✏️ Editar
