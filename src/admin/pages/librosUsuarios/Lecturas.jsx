@@ -10,6 +10,10 @@ const Lecturas = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Visor PDF (modal)
+  const [preview, setPreview] = useState({ open: false, url: "", titulo: "" });
+  const baseURL = clientAxios?.defaults?.baseURL || "";
+
   // Derivados
   const quizCount = Object.values(badgeConfigsByBook).filter(
     (cfg) => cfg?.hasQuiz
@@ -59,6 +63,46 @@ const Lecturas = () => {
       setError(err.message || "Error desconocido");
       setLoading(false);
     }
+  };
+
+  // Abrir visor PDF en modal (soporta blob o URL directa del API)
+  const openPdfPreview = async (libro) => {
+    const id = libro?._id || libro?.id;
+    if (!id) {
+      Swal.fire("Sin ID", "No se encontró el ID del libro", "info");
+      return;
+    }
+    try {
+      const res = await fetch(`${baseURL}/pdfs-cc/${id}`, {
+        headers: { Accept: "application/pdf, application/json" },
+      });
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
+
+      if (ct.includes("application/pdf")) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        setPreview({ open: true, url, titulo: libro?.nombre || "Lectura" });
+        return;
+      }
+
+      const json = await res.json();
+      const direct = json?.archivo;
+      if (direct) {
+        const url = direct.startsWith("http") ? direct : `${baseURL}${direct}`;
+        setPreview({ open: true, url, titulo: libro?.nombre || "Lectura" });
+      } else {
+        Swal.fire("Sin PDF", "Este libro no tiene PDF disponible", "info");
+      }
+    } catch (e) {
+      Swal.fire("Error", "No fue posible abrir el PDF", "error");
+    }
+  };
+
+  const closePreview = () => {
+    if (preview.url && preview.url.startsWith("blob:")) {
+      URL.revokeObjectURL(preview.url);
+    }
+    setPreview({ open: false, url: "", titulo: "" });
   };
 
   const handleDeleteBook = async (id, nombre) => {
@@ -326,6 +370,14 @@ const Lecturas = () => {
 
                   {/* Botones de acción */}
                   <div className="flex flex-col gap-2">
+                    {/* Ver PDF en modal */}
+                    <button
+                      onClick={() => openPdfPreview(libro)}
+                      className="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-center font-semibold"
+                    >
+                      Ver PDF
+                    </button>
+
                     <div className="flex gap-2">
                       <Link
                         to={`/admin/lecturas/editar/${libro._id}`}
@@ -374,6 +426,51 @@ const Lecturas = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Modal visor PDF */}
+      {preview.open && (
+        <div className="fixed inset-0 z-50">
+          {/* Fondo */}
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={closePreview}
+          />
+          {/* Contenedor */}
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b">
+                <h2 className="text-xl font-bold">{preview.titulo}</h2>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={preview.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                  >
+                    Abrir en pestaña
+                  </a>
+                  <button
+                    onClick={closePreview}
+                    className="px-3 py-1.5 bg-gray-200 rounded hover:bg-gray-300 transition"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+              {/* Visor */}
+              <div className="h-[80vh] bg-gray-100">
+                <iframe
+                  src={preview.url}
+                  title="Lector PDF"
+                  className="w-full h-full"
+                  frameBorder="0"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
