@@ -2,6 +2,12 @@ import { useContext, useEffect, useState } from "react";
 import clientAxios from "../../../config/clientAxios";
 import { AuthContext } from "../../../context/AuthProvider";
 
+const looksLikeImageUrl = (val) =>
+  typeof val === "string" &&
+  (val.startsWith("http://") ||
+    val.startsWith("https://") ||
+    val.startsWith("data:image"));
+
 const Insignias = () => {
   const { token } = useContext(AuthContext);
   const [badges, setBadges] = useState([]);
@@ -122,6 +128,7 @@ const Insignias = () => {
               : String(libroObj || "");
           const fecha = b.earnedAt ? new Date(b.earnedAt) : null;
           const icon = b.badgeIcon || "🏆";
+          const isImg = looksLikeImageUrl(icon);
           const desc =
             b.badgeDescription || "Insignia obtenida por cuestionario perfecto";
           const badgeTitle = (b.badgeName || "Lector Destacado").trim();
@@ -138,9 +145,24 @@ const Insignias = () => {
               <div className="p-5 flex-1 flex flex-col">
                 {/* Título de la insignia */}
                 <h3 className="flex items-center gap-3 mb-3">
-                  <span className="text-4xl md:text-5xl drop-shadow-sm">
-                    {icon}
-                  </span>
+                  {isImg ? (
+                    <img
+                      src={icon}
+                      alt="Insignia"
+                      className="h-12 w-12 md:h-14 md:w-14 rounded-full object-cover ring-2 ring-yellow-300"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const s = document.createElement("span");
+                        s.textContent = "🏆";
+                        s.className = "text-4xl md:text-5xl drop-shadow-sm";
+                        e.currentTarget.parentElement?.prepend(s);
+                      }}
+                    />
+                  ) : (
+                    <span className="text-4xl md:text-5xl drop-shadow-sm">
+                      {icon}
+                    </span>
+                  )}
                   <span className="text-xl md:text-2xl font-extrabold tracking-tight text-yellow-700">
                     {badgeTitle}
                   </span>
@@ -211,10 +233,25 @@ const Insignias = () => {
 
               <div className="p-6 pt-0 text-center">
                 {/* Insignia con glow */}
-                <div className="relative -mt-12 mx-auto w-28 h-28 rounded-full bg-white flex items-center justify-center border-4 border-yellow-400 animate-[pulse-glow_2s_ease-in-out_infinite]">
-                  <span className="text-6xl drop-shadow-sm">
-                    {activeBadge.icon}
-                  </span>
+                <div className="relative -mt-12 mx-auto w-28 h-28 rounded-full bg-white flex items-center justify-center border-4 border-yellow-400 animate-[pulse-glow_2s_ease-in-out_infinite] overflow-hidden">
+                  {looksLikeImageUrl(activeBadge.icon) ? (
+                    <img
+                      src={activeBadge.icon}
+                      alt="Insignia"
+                      className="w-24 h-24 rounded-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const s = document.createElement("span");
+                        s.textContent = "🏆";
+                        s.style.fontSize = "56px";
+                        e.currentTarget.parentElement?.appendChild(s);
+                      }}
+                    />
+                  ) : (
+                    <span className="text-6xl drop-shadow-sm">
+                      {activeBadge.icon}
+                    </span>
+                  )}
                 </div>
 
                 {/* Título */}

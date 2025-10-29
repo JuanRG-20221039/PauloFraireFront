@@ -3,6 +3,81 @@ import { useLocation } from "react-router-dom";
 
 const API = "http://localhost:8000";
 
+/**
+ * Helper: detectar si un string parece URL de imagen (http/https/data) o Cloudinary /image/upload
+ */
+const looksLikeImageUrl = (val) =>
+  typeof val === "string" &&
+  (/^https?:\/\//i.test(val) || val.startsWith("data:image")) &&
+  (/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(val) ||
+    val.includes("/image/upload/"));
+
+/**
+ * Confetti/serpentina simple sin dependencias
+ */
+const ConfettiBurst = () => {
+  const COLORS = [
+    "#F59E0B",
+    "#10B981",
+    "#3B82F6",
+    "#EF4444",
+    "#8B5CF6",
+    "#F97316",
+  ];
+  const PIECES = 80;
+
+  const pieces = Array.from({ length: PIECES }).map((_, i) => {
+    const left = Math.random() * 100; // %
+    const delay = Math.random() * 0.6; // s
+    const duration = 1.2 + Math.random() * 0.9; // s
+    const size = 6 + Math.random() * 8; // px
+    const rotate = Math.random() * 360;
+    const color = COLORS[i % COLORS.length];
+    const shape = Math.random() < 0.5 ? "square" : "circle";
+    const borderRadius = shape === "circle" ? "999px" : "2px";
+
+    return (
+      <span
+        key={i}
+        style={{
+          position: "absolute",
+          top: "-10vh",
+          left: `${left}%`,
+          width: `${size}px`,
+          height: `${size}px`,
+          backgroundColor: color,
+          borderRadius,
+          transform: `rotate(${rotate}deg)`,
+          animation: `confetti-fall ${duration}s linear ${delay}s forwards`,
+          pointerEvents: "none",
+          opacity: 0,
+        }}
+      />
+    );
+  });
+
+  return (
+    <>
+      <style>{`
+        @keyframes confetti-fall {
+          0% { transform: translateY(-20vh) rotate(0deg); opacity: 0; }
+          10% { opacity: 1; }
+          100% { transform: translateY(100vh) rotate(360deg); opacity: 0.9; }
+        }
+        @keyframes pulse-glow {
+          0%, 100% {
+            box-shadow: 0 0 30px rgba(250, 204, 21, 0.5), 0 0 60px rgba(250, 204, 21, 0.35);
+          }
+          50% {
+            box-shadow: 0 0 45px rgba(250, 204, 21, 0.75), 0 0 90px rgba(250, 204, 21, 0.5);
+          }
+        }
+      `}</style>
+      <div className="pointer-events-none fixed inset-0 z-[60]">{pieces}</div>
+    </>
+  );
+};
+
 const Libros = () => {
   const [libros, setLibros] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -127,12 +202,13 @@ const Libros = () => {
             quizConfig.badgeDescription ||
             "Insignia otorgada por completar el cuestionario perfectamente",
           score: quizConfig.questions.length, // perfecto
+          badgeIcon: quizConfig.badgeIcon, // persistir icono para listados
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        // Reflejar inmediatamente la insignia ganada desde BD (incluye badgeIcon)
+        // Reflejar inmediatamente la insignia ganada desde BD
         setUserBadges((prev) => [...prev, data.badge]);
       } else {
         const errorData = await response.json();
@@ -291,6 +367,9 @@ const Libros = () => {
     const total = quizConfig.questions.length || 0;
     const progressPct =
       total > 0 ? Math.round(((currentQuestion + 1) / total) * 100) : 0;
+
+    const badgeIconVal = quizConfig.badgeIcon || "🏆";
+    const isModalIconImg = looksLikeImageUrl(badgeIconVal);
 
     return (
       <>
@@ -497,50 +576,81 @@ const Libros = () => {
 
         {/* Modal de Insignia */}
         {showBadgeModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all">
-              <div className="text-center">
-                <button
-                  className="float-right text-gray-400 hover:text-gray-600"
-                  onClick={() => setShowBadgeModal(false)}
-                >
-                  ✕
-                </button>
-                <div className="text-8xl mb-4 animate-pulse">
-                  {quizConfig.badgeIcon || "🏆"}
-                </div>
-                <h2 className="text-3xl font-bold text-yellow-600 mb-2">
-                  ¡Insignia Desbloqueada!
-                </h2>
-                <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white py-3 px-6 rounded-lg mb-4 shadow-lg">
-                  <p className="text-xl font-bold">{quizConfig.badgeName}</p>
-                </div>
-                <p className="text-gray-700 mb-6 leading-relaxed">
-                  {quizConfig.badgeDescription}
-                </p>
-                <div className="bg-gray-100 rounded-lg p-4 mb-6">
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div>
-                      <p className="text-2xl font-bold text-green-600">
-                        {quizConfig.questions.length}/
-                        {quizConfig.questions.length}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Respuestas correctas
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-blue-600">100%</p>
-                      <p className="text-sm text-gray-600">Precisión</p>
+          <div className="fixed inset-0 z-50">
+            {/* Fondo oscurecido */}
+            <div
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => setShowBadgeModal(false)}
+            />
+            {/* Confetti */}
+            <ConfettiBurst />
+            {/* Contenedor modal */}
+            <div className="absolute inset-0 flex items-center justify-center p-4">
+              <div className="relative bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden">
+                {/* Header con degradado */}
+                <div className="bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 h-20" />
+                {/* Glow detrás de la insignia */}
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full bg-yellow-300/30 blur-3xl pointer-events-none" />
+                <div className="p-6 pt-0 text-center">
+                  <button
+                    className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                    onClick={() => setShowBadgeModal(false)}
+                  >
+                    ✕
+                  </button>
+                  {/* Insignia con glow */}
+                  <div className="relative -mt-12 mx-auto w-28 h-28 rounded-full bg-white flex items-center justify-center border-4 border-yellow-400 animate-[pulse-glow_2s_ease-in-out_infinite] overflow-hidden">
+                    {isModalIconImg ? (
+                      <img
+                        src={badgeIconVal}
+                        alt="Insignia"
+                        className="w-24 h-24 rounded-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          const s = document.createElement("span");
+                          s.textContent = "🏆";
+                          s.style.fontSize = "56px";
+                          e.currentTarget.parentElement?.appendChild(s);
+                        }}
+                      />
+                    ) : (
+                      <span className="text-6xl">{badgeIconVal}</span>
+                    )}
+                  </div>
+
+                  <h2 className="mt-4 text-2xl font-extrabold text-yellow-700">
+                    ¡Insignia Desbloqueada!
+                  </h2>
+                  <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white py-3 px-6 rounded-lg mb-4 shadow-lg inline-block">
+                    <p className="text-xl font-bold">{quizConfig.badgeName}</p>
+                  </div>
+                  <p className="text-gray-700 mb-6 leading-relaxed">
+                    {quizConfig.badgeDescription}
+                  </p>
+                  <div className="bg-gray-100 rounded-lg p-4 mb-6">
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div>
+                        <p className="text-2xl font-bold text-green-600">
+                          {quizConfig.questions.length}/
+                          {quizConfig.questions.length}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Respuestas correctas
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-blue-600">100%</p>
+                        <p className="text-sm text-gray-600">Precisión</p>
+                      </div>
                     </div>
                   </div>
+                  <button
+                    className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 active:scale-95 transition font-semibold shadow-lg"
+                    onClick={() => setShowBadgeModal(false)}
+                  >
+                    ¡Genial!
+                  </button>
                 </div>
-                <button
-                  className="w-full px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition font-semibold shadow-lg"
-                  onClick={() => setShowBadgeModal(false)}
-                >
-                  ¡Genial!
-                </button>
               </div>
             </div>
           </div>
@@ -558,15 +668,25 @@ const Libros = () => {
       {libros.map((libro, index) => {
         const libroId = libro?._id || libro?.id;
 
-        // Insignia ganada por usuario (desde BD)
+        // Insignia ganada por usuario (desde BD) o config cache
         const userBadge = badgesMap[libroId];
-
-        // Config en cache (cuando no hay UserBadge)
         const cfg = badgeConfigsCache[libroId];
 
         // Decide qué icono/etiqueta mostrar
         const iconToShow = userBadge?.badgeIcon || cfg?.badgeIcon || null;
-        const labelToShow = userBadge?.badgeName || cfg?.badgeName || null;
+        const isBadgeImg = looksLikeImageUrl(iconToShow);
+
+        // Portada: usa libro.imagen; si no existe y la descripción es URL de imagen, úsala
+        const coverSrc =
+          (typeof libro.imagen === "string" && libro.imagen) ||
+          (looksLikeImageUrl(libro.descripcion) ? libro.descripcion : null);
+
+        // Descripción solo si NO es URL
+        const safeDescripcion =
+          typeof libro.descripcion === "string" &&
+          !looksLikeImageUrl(libro.descripcion)
+            ? libro.descripcion
+            : "";
 
         return (
           <div
@@ -578,27 +698,46 @@ const Libros = () => {
               {libro.nombre}
             </h3>
 
-            {/* Imagen */}
-            {libro.imagen && (
+            {/* Imagen de portada */}
+            {coverSrc && (
               <img
-                src={libro.imagen}
+                src={coverSrc}
                 alt={libro.nombre}
                 className="w-full h-48 object-cover rounded mb-4"
               />
             )}
 
-            {/* Descripción */}
-            <p className="text-gray-600 mb-4 text-center">
-              {libro.descripcion?.length > 200
-                ? `${libro.descripcion.slice(0, 200)}...`
-                : libro.descripcion}
-            </p>
+            {/* Descripción (solo texto) */}
+            {safeDescripcion ? (
+              <p className="text-gray-600 mb-4 text-center break-words">
+                {safeDescripcion.length > 200
+                  ? `${safeDescripcion.slice(0, 200)}...`
+                  : safeDescripcion}
+              </p>
+            ) : (
+              <div className="mb-4" />
+            )}
 
             {/* Pie: insignia (BD/config) a la izquierda, botón a la derecha */}
             <div className="mt-auto w-full flex items-center justify-between">
               {iconToShow ? (
-                <div className="flex items-center">
-                  <span className="text-2xl">{iconToShow}</span>
+                <div className="flex items-center gap-2">
+                  {isBadgeImg ? (
+                    <img
+                      src={iconToShow}
+                      alt="Insignia"
+                      className="h-8 w-8 rounded-full object-cover ring-2 ring-yellow-300"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const s = document.createElement("span");
+                        s.textContent = "🏆";
+                        s.className = "text-2xl";
+                        e.currentTarget.parentElement?.appendChild(s);
+                      }}
+                    />
+                  ) : (
+                    <span className="text-2xl">{iconToShow}</span>
+                  )}
                 </div>
               ) : (
                 <div />

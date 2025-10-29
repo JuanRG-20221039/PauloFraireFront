@@ -50,6 +50,7 @@ import AddEventos from "./admin/pages/Eventos/Eventos.jsx";
 import Lecturas from "./admin/pages/librosUsuarios/lecturas.jsx";
 import AgregarEditarLibro from "./admin/pages/librosUsuarios/AgregarEditarLibro.jsx";
 import GestionarCuestionario from "./admin/pages/librosUsuarios/GestionarCuestionario.jsx";
+import InsigniasU from "./admin/pages/librosUsuarios/InsigniasU.jsx";
 
 // Configuración de la empresa
 import Empresa from "./admin/pages/Empresa/Configempresa.jsx";
@@ -137,6 +138,7 @@ const router = createBrowserRouter([
       { path: "/admin/libros", element: <Lecturas /> },
       { path: "/admin/lecturas/agregar", element: <AgregarEditarLibro /> },
       { path: "/admin/lecturas/editar/:id", element: <AgregarEditarLibro /> },
+      { path: "/admin/insigniasu", element: <InsigniasU /> },
       {
         path: "/admin/lecturas/cuestionario/:id",
         element: <GestionarCuestionario />,

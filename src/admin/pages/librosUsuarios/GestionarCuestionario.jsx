@@ -4,6 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import clientAxios from "../../../config/clientAxios";
 
+const UPLOAD_ENDPOINT = "/upload/badge-icon"; // Backend: POST, multipart, field 'icon' -> { url }
+
 const GestionarCuestionario = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -16,7 +18,7 @@ const GestionarCuestionario = () => {
   const [hasQuiz, setHasQuiz] = useState(false);
   const [questions, setQuestions] = useState([]);
 
-  // Estado de la insignia
+  // Estado de la insignia (emoji o URL)
   const [badgeConfig, setBadgeConfig] = useState({
     badgeName: "Guerrero Lector",
     badgeDescription:
@@ -24,14 +26,25 @@ const GestionarCuestionario = () => {
     badgeIcon: "🏆",
   });
 
+  // NUEVO: controles para imagen
+  const [badgeMode, setBadgeMode] = useState("emoji"); // "emoji" | "image"
+  const [badgeImageFile, setBadgeImageFile] = useState(null);
+  const [badgeImagePreview, setBadgeImagePreview] = useState("");
+
   useEffect(() => {
     fetchLibro();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  const looksLikeImageUrl = (val) =>
+    typeof val === "string" &&
+    (val.startsWith("http://") ||
+      val.startsWith("https://") ||
+      val.startsWith("data:image"));
 
   const fetchLibro = async () => {
     try {
       const { data } = await clientAxios.get(`/pdfs-cc/${id}`);
-      console.log("Datos del libro cargados:", data);
       setLibro(data);
 
       // Cargar configuración existente de BadgeConfig
@@ -40,18 +53,29 @@ const GestionarCuestionario = () => {
 
         if (configResponse.data.hasConfig) {
           const config = configResponse.data.badgeConfig;
-          setHasQuiz(config.hasQuiz);
-          setQuestions(config.questions || []);
+          setHasQuiz(!!config.hasQuiz);
+          setQuestions(Array.isArray(config.questions) ? config.questions : []);
+          const icon = config.badgeIcon || "🏆";
+
           setBadgeConfig({
             badgeName: config.badgeName || "Guerrero Lector",
             badgeDescription:
               config.badgeDescription ||
               "Insignia otorgada por completar el cuestionario perfectamente",
-            badgeIcon: config.badgeIcon || "🏆",
+            badgeIcon: icon,
           });
+
+          // Ajustar modo según icono guardado
+          if (looksLikeImageUrl(icon)) {
+            setBadgeMode("image");
+            setBadgeImagePreview(icon);
+          } else {
+            setBadgeMode("emoji");
+            setBadgeImagePreview("");
+          }
         }
-      } catch (configError) {
-        console.log("No hay configuración previa, usando valores por defecto");
+      } catch {
+        // No hay configuración previa
       }
 
       setLoading(false);
@@ -66,29 +90,23 @@ const GestionarCuestionario = () => {
   const handleAddQuestion = () => {
     setQuestions([
       ...questions,
-      {
-        question: "",
-        options: ["", "", "", ""],
-        correct: 0,
-      },
+      { question: "", options: ["", "", "", ""], correct: 0 },
     ]);
   };
 
-  // Actualizar pregunta
+  // Actualizar pregunta/opciones
   const handleQuestionChange = (index, field, value) => {
     const newQuestions = [...questions];
     newQuestions[index][field] = value;
     setQuestions(newQuestions);
   };
 
-  // Actualizar opción de pregunta
-  const handleOptionChange = (questionIndex, optionIndex, value) => {
+  const handleOptionChange = (qIndex, optIndex, value) => {
     const newQuestions = [...questions];
-    newQuestions[questionIndex].options[optionIndex] = value;
+    newQuestions[qIndex].options[optIndex] = value;
     setQuestions(newQuestions);
   };
 
-  // Eliminar pregunta
   const handleDeleteQuestion = (index) => {
     Swal.fire({
       title: "¿Eliminar pregunta?",
@@ -99,17 +117,106 @@ const GestionarCuestionario = () => {
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
+    }).then((r) => {
+      if (r.isConfirmed) {
         const newQuestions = questions.filter((_, i) => i !== index);
         setQuestions(newQuestions);
       }
     });
   };
 
-  // Actualizar configuración de insignia
+  // Insignia
   const handleBadgeChange = (field, value) => {
     setBadgeConfig({ ...badgeConfig, [field]: value });
+  };
+
+  // NUEVO: selección de modo
+  const handleModeChange = (mode) => {
+    setBadgeMode(mode);
+    if (mode === "emoji") {
+      setBadgeImageFile(null);
+      setBadgeImagePreview("");
+      if (looksLikeImageUrl(badgeConfig.badgeIcon)) {
+        setBadgeConfig((p) => ({ ...p, badgeIcon: "🏆" }));
+      }
+    }
+  };
+
+  // NUEVO: seleccionar imagen
+  const handleBadgeImageSelect = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+
+    if (!/^image\/(png|jpe?g|webp|gif|svg\+xml)$/.test(f.type)) {
+      Swal.fire(
+        "Formato inválido",
+        "Sube PNG, JPG, WEBP, GIF o SVG.",
+        "warning"
+      );
+      return;
+    }
+    const MAX_MB = 3;
+    if (f.size > MAX_MB * 1024 * 1024) {
+      Swal.fire("Archivo muy grande", `Máximo ${MAX_MB} MB.`, "warning");
+      return;
+    }
+
+    setBadgeImageFile(f);
+    setBadgeImagePreview(URL.createObjectURL(f));
+  };
+
+  // NUEVO: quitar imagen
+  const handleRemoveImage = () => {
+    setBadgeImageFile(null);
+    setBadgeImagePreview("");
+    if (looksLikeImageUrl(badgeConfig.badgeIcon)) {
+      setBadgeConfig((p) => ({ ...p, badgeIcon: "🏆" }));
+    }
+  };
+
+  // NUEVO: subir a Cloudinary vía backend
+  const uploadBadgeImageIfNeeded = async () => {
+    if (badgeMode !== "image") return null;
+
+    // Ya había URL y no cambiaron archivo
+    if (!badgeImageFile && looksLikeImageUrl(badgeImagePreview)) {
+      return badgeImagePreview;
+    }
+    if (!badgeImageFile) return null;
+
+    try {
+      const form = new FormData();
+      form.append("icon", badgeImageFile); // campo 'icon' según la ruta
+      form.append("libroId", id);
+
+      const res = await clientAxios.post(UPLOAD_ENDPOINT, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const url =
+        res?.data?.url ||
+        res?.data?.secure_url ||
+        res?.data?.secureUrl ||
+        res?.data?.path;
+
+      if (!url) throw new Error("El servidor no devolvió la URL de la imagen");
+      return url;
+    } catch (e) {
+      console.error("Error subiendo icono de insignia:", e);
+      const r = await Swal.fire({
+        title: "Error al subir imagen",
+        text: "¿Quieres guardar usando el emoji por ahora?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, usar emoji",
+        cancelButtonText: "Cancelar",
+      });
+      if (r.isConfirmed) {
+        setBadgeMode("emoji");
+        return null;
+      }
+      throw e;
+    }
   };
 
   // Guardar todo
@@ -141,25 +248,29 @@ const GestionarCuestionario = () => {
         title: "Sesión requerida",
         text: "Debes iniciar sesión para realizar esta acción",
         icon: "warning",
-      }).then(() => {
-        navigate("/login");
-      });
+      }).then(() => navigate("/login"));
       return;
     }
 
     setSaving(true);
 
     try {
+      let iconToSend = badgeConfig.badgeIcon;
+      if (badgeMode === "image") {
+        const uploadedUrl = await uploadBadgeImageIfNeeded();
+        if (uploadedUrl) iconToSend = uploadedUrl;
+        else if (!looksLikeImageUrl(iconToSend))
+          iconToSend = iconToSend || "🏆";
+      }
+
       const dataToSend = {
         libroId: id,
         badgeName: badgeConfig.badgeName,
         badgeDescription: badgeConfig.badgeDescription,
-        badgeIcon: badgeConfig.badgeIcon,
+        badgeIcon: iconToSend, // URL Cloudinary o emoji
         hasQuiz: hasQuiz,
         questions: hasQuiz ? questions : [],
       };
-
-      console.log("Enviando datos:", dataToSend);
 
       await clientAxios.post("/badge-config", dataToSend);
 
@@ -179,9 +290,7 @@ const GestionarCuestionario = () => {
           error.response.data.msg ||
             "Token inválido o expirado. Por favor, inicia sesión nuevamente.",
           "error"
-        ).then(() => {
-          navigate("/login");
-        });
+        ).then(() => navigate("/login"));
       } else if (error.response?.status === 403) {
         Swal.fire(
           "Acceso denegado",
@@ -269,25 +378,98 @@ const GestionarCuestionario = () => {
                 🏆 Configuración de Insignia
               </h3>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    Icono de la Insignia
-                  </label>
+              {/* Selector de modo */}
+              <div className="flex items-center gap-4 mb-4">
+                <label className="flex items-center gap-2">
                   <input
-                    type="text"
-                    value={badgeConfig.badgeIcon}
-                    onChange={(e) =>
-                      handleBadgeChange("badgeIcon", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="🏆"
+                    type="radio"
+                    name="badgeMode"
+                    checked={badgeMode === "emoji"}
+                    onChange={() => handleModeChange("emoji")}
                   />
-                  <p className="text-sm text-gray-500 mt-1">
-                    Puedes usar cualquier emoji como icono
-                  </p>
-                </div>
+                  <span className="text-sm text-gray-700">Usar emoji</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="badgeMode"
+                    checked={badgeMode === "image"}
+                    onChange={() => handleModeChange("image")}
+                  />
+                  <span className="text-sm text-gray-700">Subir imagen</span>
+                </label>
+              </div>
 
+              {/* Emoji */}
+              {badgeMode === "emoji" && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 font-semibold mb-2">
+                      Icono de la Insignia (emoji)
+                    </label>
+                    <input
+                      type="text"
+                      value={badgeConfig.badgeIcon}
+                      onChange={(e) =>
+                        handleBadgeChange("badgeIcon", e.target.value)
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="🏆"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Puedes usar cualquier emoji como icono
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Imagen */}
+              {badgeMode === "image" && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 font-semibold mb-2">
+                      Imagen de la Insignia
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        id="badgeImgInput"
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                        onChange={handleBadgeImageSelect}
+                        className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-yellow-100 file:text-yellow-700 hover:file:bg-yellow-200"
+                      />
+                      {badgeImagePreview && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="px-3 py-2 text-sm rounded-md bg-gray-200 hover:bg-gray-300"
+                        >
+                          Quitar
+                        </button>
+                      )}
+                    </div>
+
+                    {badgeImagePreview && (
+                      <div className="mt-4 flex items-center gap-3">
+                        <div className="relative">
+                          <div className="absolute inset-0 rounded-full blur-2xl bg-yellow-300/40" />
+                          <img
+                            src={badgeImagePreview}
+                            alt="Insignia"
+                            className="relative h-16 w-16 rounded-full border-4 border-yellow-300 object-cover"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          La imagen se guardará como icono de la insignia.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Nombre/Descripción + Preview combinada */}
+              <div className="space-y-4 mt-6">
                 <div>
                   <label className="block text-gray-700 font-semibold mb-2">
                     Nombre de la Insignia
@@ -318,11 +500,25 @@ const GestionarCuestionario = () => {
                   />
                 </div>
 
-                {/* Preview de la insignia */}
                 <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
                   <p className="text-sm text-gray-600 mb-2">Vista previa:</p>
                   <div className="flex items-center gap-3">
-                    <span className="text-4xl">{badgeConfig.badgeIcon}</span>
+                    {badgeMode === "image" && badgeImagePreview ? (
+                      <img
+                        src={badgeImagePreview}
+                        alt="Insignia"
+                        className="h-12 w-12 rounded-full border-2 border-yellow-300 object-cover"
+                      />
+                    ) : looksLikeImageUrl(badgeConfig.badgeIcon) ? (
+                      <img
+                        src={badgeConfig.badgeIcon}
+                        alt="Insignia"
+                        className="h-12 w-12 rounded-full border-2 border-yellow-300 object-cover"
+                      />
+                    ) : (
+                      <span className="text-4xl">{badgeConfig.badgeIcon}</span>
+                    )}
+
                     <div>
                       <p className="font-bold text-yellow-700">
                         {badgeConfig.badgeName}
@@ -376,7 +572,6 @@ const GestionarCuestionario = () => {
                         </button>
                       </div>
 
-                      {/* Pregunta */}
                       <div className="mb-4">
                         <label className="block text-gray-700 font-semibold mb-2">
                           Texto de la pregunta
@@ -396,7 +591,6 @@ const GestionarCuestionario = () => {
                         />
                       </div>
 
-                      {/* Opciones */}
                       <div className="space-y-2 mb-4">
                         <label className="block text-gray-700 font-semibold mb-2">
                           Opciones de respuesta
@@ -428,7 +622,6 @@ const GestionarCuestionario = () => {
                         ))}
                       </div>
 
-                      {/* Respuesta correcta */}
                       <div>
                         <label className="block text-gray-700 font-semibold mb-2">
                           Respuesta correcta

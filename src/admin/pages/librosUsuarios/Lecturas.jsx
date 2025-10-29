@@ -20,6 +20,12 @@ const Lecturas = () => {
     fetchData();
   }, []);
 
+  const looksLikeImageUrl = (val) =>
+    typeof val === "string" &&
+    (val.startsWith("http://") ||
+      val.startsWith("https://") ||
+      val.startsWith("data:image"));
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -248,6 +254,7 @@ const Lecturas = () => {
             const questionsLen = cfg?.questions?.length || 0;
             const badgeIcon = cfg?.badgeIcon || "🏆";
             const badgeName = cfg?.badgeName || "Guerrero Lector";
+            const isImage = looksLikeImageUrl(badgeIcon);
 
             return (
               <div
@@ -289,8 +296,24 @@ const Lecturas = () => {
                   {/* Info de insignia */}
                   {hasQuiz && (
                     <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">{badgeIcon}</span>
+                      <div className="flex items-center gap-3">
+                        {isImage ? (
+                          <img
+                            src={badgeIcon}
+                            alt="Insignia"
+                            className="h-7 w-7 rounded-full object-cover ring-2 ring-yellow-300"
+                            onError={(e) => {
+                              // fallback visual simple si falla la URL
+                              e.currentTarget.style.display = "none";
+                              const sibling = document.createElement("span");
+                              sibling.textContent = "🏆";
+                              sibling.className = "text-2xl";
+                              e.currentTarget.parentElement?.prepend(sibling);
+                            }}
+                          />
+                        ) : (
+                          <span className="text-2xl">{badgeIcon}</span>
+                        )}
                         <div>
                           <p className="text-xs text-gray-600">Insignia:</p>
                           <p className="text-sm font-semibold text-yellow-700">

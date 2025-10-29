@@ -87,6 +87,11 @@ const adminNavItems = [
     icon: <FaBook className="text-2xl" />,
     label: "Lecturas",
   },
+  {
+    to: "/admin/insigniasu",
+    icon: <FaBook className="text-2xl" />,
+    label: "Insignias Usuarios",
+  },
 ];
 
 const SideBar = () => {
