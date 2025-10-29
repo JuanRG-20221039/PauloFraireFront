@@ -77,7 +77,7 @@ export default defineConfig({
       workbox: {
         runtimeCaching: [
           {
-            urlPattern: "http://localhost:8000/api/getoffter",
+            urlPattern: "https://paulofraireback-2.onrender.com/api/getoffter",
             handler: "NetworkFirst",
             options: {
               cacheName: "Marvinxdxd",
