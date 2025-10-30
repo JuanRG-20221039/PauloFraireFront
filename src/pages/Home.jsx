@@ -10,25 +10,28 @@ import Inscripciones from '../components/home/Inscripciones';
 import PromotionalVideo from '../components/home/PromotionalVideo';
 import DiplomadoInformation from '../components/home/DiplomadoInformation';
 import Anniversary from '../components/home/Anniversary';
+import Geolocation, { LocationProvider } from '../components/Geolocation';
 
 const Home = () => {
-
-
   return (
-    <Fragment >
-      <Hero />
-      <Inscripciones />
-      <Anniversary />
-      <PromotionalVideo />
-      <DiplomadoInformation />
-      <Welcome />
-      <News />
-      {/* <Galery /> */}
-      <History />
-      <DigitalLibrary />
-      <ContactForm />
-
-    </Fragment>
+    <LocationProvider>
+      <Fragment>
+        <Hero />
+        <Inscripciones />
+        <Anniversary />
+        <PromotionalVideo />
+        <DiplomadoInformation />
+        <Welcome />
+        <News />
+        {/* <Galery /> */}
+        <History />
+        <DigitalLibrary />
+        <ContactForm />
+        <div className="max-w-[1300px] mx-auto my-10 px-4">
+          <Geolocation />
+        </div>
+      </Fragment>
+    </LocationProvider>
   )
 }
 
