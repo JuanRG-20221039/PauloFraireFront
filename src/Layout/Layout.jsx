@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import imgChat from '../assets/img/chat.png'
 import { Toaster } from 'react-hot-toast';
+import NotificationComponent from '../components/notifications/NotificationComponent';
 
 const Layout = () => {
 
@@ -21,6 +22,7 @@ const Layout = () => {
         position="top-right"
         reverseOrder={false}
       />
+      <NotificationComponent />
 
       <Header />
       <div className='fixed bottom-9 right-4 '>

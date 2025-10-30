@@ -1,0 +1,46 @@
+.notifications-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 15px;
+}
+
+.notification-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  margin-bottom: 15px;
+  border-left: 4px solid #3b82f6;
+}
+
+.notification-card h3 {
+  margin-top: 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.notification-card p {
+  color: #4b5563;
+  margin: 8px 0;
+}
+
+.notification-card small {
+  display: block;
+  color: #9ca3af;
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.notification-toast {
+  padding: 5px;
+}
+
+.notification-toast h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.notification-toast p {
+  margin: 5px 0 0;
+  font-size: 0.9rem;
+}
