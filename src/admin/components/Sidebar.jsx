@@ -7,6 +7,7 @@ import {
   FaBook,
   FaUsers,
   FaLandmark,
+  FaSitemap,
 } from "react-icons/fa";
 import { TiThMenuOutline } from "react-icons/ti";
 import { BiHomeAlt, BiSelectMultiple } from "react-icons/bi";
@@ -82,6 +83,11 @@ const adminNavItems = [
     icon: <FaLandmark className="text-2xl" />,
     label: "Historia y Cultura",
   },
+  {
+    to: "/admin/organizacion",
+    icon: <FaSitemap className="text-2xl" />,
+    label: "Organización",
+  },
 ];
 
 const SideBar = () => {
@@ -93,15 +99,17 @@ const SideBar = () => {
 
   useEffect(() => {
     // Obtener el rol del usuario desde localStorage
-    const userRole = localStorage.getItem("token") 
-      ? JSON.parse(localStorage.getItem("token")).role 
+    const userRole = localStorage.getItem("token")
+      ? JSON.parse(localStorage.getItem("token")).role
       : null;
-    
+
     // Filtrar elementos del menú según el rol
-    if (userRole === 2) { // Si es editor
+    if (userRole === 2) {
+      // Si es editor
       // Excluir los módulos de Usuarios y Configuración datos de la empresa
-      const filtered = adminNavItems.filter(item => 
-        item.to !== "/admin/users" && item.to !== "/admin/configempresa"
+      const filtered = adminNavItems.filter(
+        (item) =>
+          item.to !== "/admin/users" && item.to !== "/admin/configempresa"
       );
       setFilteredNavItems(filtered);
     } else {

@@ -47,6 +47,9 @@ import EditBeca from "./admin/pages/beca/EditBeca.jsx";
 import ModeloPredictivo from "./admin/pages/ModeloPredictivo.jsx";
 import QuienesSomos from "./admin/pages/QuienesSomos/QuienesSomos.jsx";
 import HistoriaCultura from "./admin/pages/historiaCultura/HistoriaCultura.jsx";
+import Organizacion from "./admin/pages/organizacion/Organizacion.jsx";
+import CreateStaff from "./admin/pages/organizacion/CreateStaff.jsx";
+import EditStaff from "./admin/pages/organizacion/EditStaff.jsx";
 // Configuración de la empresa
 import Empresa from "./admin/pages/Empresa/Configempresa.jsx";
 
@@ -128,6 +131,9 @@ const router = createBrowserRouter([
       { path: "/admin/edit-beca/:id", element: <EditBeca /> },
       { path: "/admin/quienesSomos", element: <QuienesSomos /> },
       { path: "/admin/historiacultura", element: <HistoriaCultura /> },
+      { path: "/admin/organizacion", element: <Organizacion /> },
+      { path: "/admin/add-staff", element: <CreateStaff /> },
+      { path: "/admin/edit-staff/:id", element: <EditStaff /> },
 
       {
         path: "/admin/contexto-contemporaneo-admin",
