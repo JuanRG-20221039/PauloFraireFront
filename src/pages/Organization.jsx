@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import clientAxios from "../config/clientAxios";
 import Breadcrumbs from "../components/navbar/Breadcrumbs";
 import { motion } from "framer-motion";
+import Zonas from "./Zonas";
 
 const Organization = () => {
   const breadcrumbs = ["Organización"];
@@ -314,6 +315,8 @@ const Organization = () => {
           </div>
         )}
       </div>
+      {/* Zonas: sección al final */}
+      <Zonas />
     </div>
   );
 };
