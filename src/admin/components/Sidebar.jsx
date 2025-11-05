@@ -8,6 +8,7 @@ import {
   FaUsers,
   FaLandmark,
   FaSitemap,
+  FaUniversity,
 } from "react-icons/fa";
 import { TiThMenuOutline } from "react-icons/ti";
 import { BiHomeAlt, BiSelectMultiple } from "react-icons/bi";
@@ -87,6 +88,11 @@ const adminNavItems = [
     to: "/admin/organizacion",
     icon: <FaSitemap className="text-2xl" />,
     label: "Organización",
+  },
+  {
+    to: "/admin/zonas",
+    icon: <FaUniversity className="text-2xl" />,
+    label: "Zonas",
   },
 ];
 

@@ -50,6 +50,7 @@ import HistoriaCultura from "./admin/pages/historiaCultura/HistoriaCultura.jsx";
 import Organizacion from "./admin/pages/organizacion/Organizacion.jsx";
 import CreateStaff from "./admin/pages/organizacion/CreateStaff.jsx";
 import EditStaff from "./admin/pages/organizacion/EditStaff.jsx";
+import Zonas from "./admin/pages/organizacion/zonas.jsx";
 // Configuración de la empresa
 import Empresa from "./admin/pages/Empresa/Configempresa.jsx";
 
@@ -134,6 +135,7 @@ const router = createBrowserRouter([
       { path: "/admin/organizacion", element: <Organizacion /> },
       { path: "/admin/add-staff", element: <CreateStaff /> },
       { path: "/admin/edit-staff/:id", element: <EditStaff /> },
+      { path: "/admin/zonas", element: <Zonas /> },
 
       {
         path: "/admin/contexto-contemporaneo-admin",
