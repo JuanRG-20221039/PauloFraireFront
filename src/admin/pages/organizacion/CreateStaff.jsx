@@ -134,14 +134,20 @@ const CreateStaff = () => {
 
           <div>
             <label className="block text-gray-700 font-semibold">Orden:</label>
-            <input
-              type="number"
-              min="1"
+            <select
               value={order}
-              onChange={(e) => setOrder(e.target.value)}
-              placeholder="Ingrese el orden de visualización"
+              onChange={(e) => setOrder(Number(e.target.value))}
               className="w-full p-2 border rounded-lg"
-            />
+            >
+              <option value="" disabled>
+                Seleccionar (1–15)
+              </option>
+              {Array.from({ length: 15 }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
             <p className="text-xs text-gray-500 mt-1">
               El orden determina la posición en la lista
             </p>

@@ -189,7 +189,7 @@ const Organization = () => {
                   variants={rowVariants}
                   initial="hidden"
                   animate="visible"
-                  className={`grid gap-6 w-full justify-items-center relative z-10 ${
+                  className={`grid gap-6 w-full justify-items-center items-stretch relative z-10 ${
                     rowIndex === 0
                       ? "grid-cols-1 mb-12"
                       : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-12"
@@ -202,7 +202,7 @@ const Organization = () => {
                     <motion.div
                       key={person._id}
                       variants={cardVariants}
-                      className="w-full max-w-sm flex"
+                      className="w-full max-w-sm flex h-full"
                     >
                       {/* Tarjeta con diseño horizontal: círculo sobresaliendo + texto */}
                       {/* En móvil: centrado con imagen arriba del card */}
@@ -228,7 +228,7 @@ const Organization = () => {
                             )}
                           </div>
 
-                          <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-4 w-full text-center">
+                          <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-4 w-full min-h-[200px] h-full text-center whitespace-normal break-all flex flex-col justify-center">
                             <h3 className="text-base font-bold text-slate-800 leading-tight">
                               {person.name}
                             </h3>
@@ -247,7 +247,7 @@ const Organization = () => {
                         </div>
 
                         {/* Versión ESCRITORIO - imagen sobresaliendo a la izquierda */}
-                        <div className="hidden sm:flex items-center pl-16">
+                        <div className="hidden sm:flex items-stretch pl-16 h-full">
                           <div className="absolute left-0 z-10">
                             <div className="relative">
                               <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-teal-400 bg-gradient-to-br from-teal-100 to-blue-100 shadow-lg">
@@ -268,8 +268,8 @@ const Organization = () => {
                             </div>
                           </div>
 
-                          <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-4 pl-20 w-full min-h-[100px] flex items-center">
-                            <div className="flex-grow text-left">
+                          <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-4 pl-20 w-full min-h-[200px] h-full flex items-start whitespace-normal break-all">
+                            <div className="flex-grow text-left whitespace-normal break-all">
                               <h3 className="text-base font-bold text-slate-800 leading-tight">
                                 {person.name}
                               </h3>
