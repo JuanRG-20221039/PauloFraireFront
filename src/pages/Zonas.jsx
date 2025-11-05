@@ -52,14 +52,14 @@ const Zonas = () => {
             {/* línea decorativa en el borde izquierdo */}
             <span className="absolute left-4 top-6 bottom-6 w-1 bg-slate-800"></span>
 
-            <div className="pl-6">
-              <p className="text-slate-700 font-bold uppercase tracking-wide mb-2">
+            <div className="pl-6 whitespace-normal break-words">
+              <p className="text-slate-700 font-bold uppercase tracking-wide mb-2 whitespace-normal break-words">
                 {z.lugar}
               </p>
-              <p className="text-slate-900 font-extrabold text-lg">
+              <p className="text-slate-900 font-extrabold text-lg whitespace-normal break-words">
                 Dr. ECDP: {z.encargado}
               </p>
-              <p className="text-slate-800 font-bold mt-1">
+              <p className="text-slate-800 font-bold mt-1 whitespace-normal break-words">
                 Cel.: {z.telefono}
               </p>
             </div>
