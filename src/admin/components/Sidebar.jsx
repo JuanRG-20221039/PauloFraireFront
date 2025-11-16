@@ -43,16 +43,6 @@ const adminNavItems = [
     icon: <FaCog className="text-2xl" />,
     label: "Configuración datos de la empresa",
   },
-  {
-    to: "/admin/about",
-    icon: <FaBook className="text-2xl" />,
-    label: "Acerca de",
-    subItems: [
-      { to: "/admin/about/deslinde", label: "Deslinde legal" },
-      { to: "/admin/about/terminos", label: "Términos y condiciones" },
-      { to: "/admin/about/politicas", label: "Políticas de privacidad" },
-    ],
-  },
 
   // ➕ APORTES DE MARVINSH
   {
@@ -69,6 +59,17 @@ const adminNavItems = [
     to: "/admin/multimediainscripciones",
     icon: <FaPhotoVideo className="text-2xl" />,
     label: "Multimedia en inscripciones",
+  },
+
+    {
+    to: "/admin/about",
+    icon: <FaBook className="text-2xl" />,
+    label: "Acerca de",
+    subItems: [
+      { to: "/admin/about/deslinde", label: "Deslinde legal" },
+      { to: "/admin/about/terminos", label: "Términos y condiciones" },
+      { to: "/admin/about/politicas", label: "Políticas de privacidad" },
+    ],
   },
 ];
 
