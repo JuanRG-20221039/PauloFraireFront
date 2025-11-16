@@ -54,8 +54,9 @@ const Becas = () => {
 
   return (
     <section className="container mx-auto p-6">
-      <h1 className="text-center text-3xl font-bold">Administrar Becas</h1>
-      <Link to="/admin/add-beca" className="btn bg-blue-500 text-white p-2 rounded">Agregar Beca</Link>
+      <h1 className="text-center text-3xl font-bold text-slate-600 mt-10">Administrar Becas</h1>
+      <br></br>
+      <Link to="/admin/add-beca" className="btn-action">Agregar Beca</Link>
       <table className="table-auto w-full border mt-4">
         <thead>
           <tr>
@@ -74,15 +75,15 @@ const Becas = () => {
           ) : (
             becas.map((beca, index) => (
               <tr key={beca._id}>
-                <td className="border px-4 py-2 text-center">{index + 1}</td>
-                <td className="border px-4 py-2">{beca.title}</td>
-                <td className="border px-4 py-2">{beca.description}</td>
+                <td className="border px-4 py-2 text-center text-slate-600">{index + 1}</td>
+                <td className="border px-4 py-2 text-slate-600">{beca.title}</td>
+                <td className="border px-4 py-2 text-slate-600">{beca.description}</td>
                 <td className="border px-4 py-2">
-                  <img src={beca.imageUrl} alt={beca.title} className="w-20 h-20 object-cover" />
+                  <img src={beca.imageUrl} alt={beca.title} className="w-20 h-20 object-cover rounded" />
                 </td>
                 <td className="border px-4 py-2 flex gap-2">
-                  <Link to={`/admin/edit-beca/${beca._id}`} className="text-blue-600">Editar</Link>
-                  <button onClick={() => handleDelete(beca._id)} className="text-red-600">Eliminar</button>
+                  <Link to={`/admin/edit-beca/${beca._id}`} className="btn-action bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Editar</Link>
+                  <button onClick={() => handleDelete(beca._id)} className="btn-action bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Eliminar</button>
                 </td>
               </tr>
             ))

@@ -111,7 +111,7 @@ export const navLinks = [
     },
     {
         id: 6,
-        link: "Análisis educativo contamporáneo",
+        link: "Análisis educativo contemporáneo",
         path: "/contexto-contemporaneo"
     },    
     {

@@ -42,7 +42,7 @@ const News = () => {
 
                     <div className=" grid sm:grid-cols-2 grid-cols-1 md:grid-cols-3 gap-4 mx-5 mt-5">
                         {
-                            blog.map(({ _id, title, img, date }) => (
+                            blog.slice().reverse().map(({ _id, title, img, date }) => (
                                 <div
                                     key={_id}
                                     className={`shadow-xl bg-slate-50 bg-clip-border border-2 border-solid border-slate-200 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105`}

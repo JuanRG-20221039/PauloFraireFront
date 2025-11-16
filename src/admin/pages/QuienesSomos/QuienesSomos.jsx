@@ -75,12 +75,12 @@ const QuienesSomos = () => {
     }
 
     setVideoFile(file);
-    setRemoveVideo(false); // Si se sube un nuevo video, no eliminamos el actual
+    setRemoveVideo(false);
   };
 
   const handleRemoveVideo = () => {
     setRemoveVideo(true);
-    setVideoFile(null); // Limpiamos el nuevo video si el usuario decide eliminar el actual
+    setVideoFile(null);
     Swal.fire(
       "Video eliminado",
       "El video actual será eliminado al guardar.",
@@ -93,7 +93,6 @@ const QuienesSomos = () => {
     setIsSubmitting(true);
     setUploadProgress(0);
 
-    // Validar campos de texto
     if (
       !form.tituloPrincipal.trim() ||
       !form.subtitulo1.trim() ||
@@ -114,7 +113,6 @@ const QuienesSomos = () => {
       return;
     }
 
-    // Validar video al crear nuevo contenido
     if (!data && !videoFile) {
       Swal.fire("Error", "Debes incluir un video al crear contenido", "error");
       setIsSubmitting(false);
@@ -138,7 +136,7 @@ const QuienesSomos = () => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
-        timeout: 300000, // 300 segundos (5 minutos)
+        timeout: 300000,
         onUploadProgress: (progressEvent) => {
           const percent = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
@@ -222,6 +220,14 @@ const QuienesSomos = () => {
     }
   };
 
+  // Etiquetas personalizadas
+  const secciones = [
+    { key: 1, label: "¿Quiénes Somos ?" },
+    { key: 2, label: "Misión" },
+    { key: 3, label: "Visión" },
+    { key: 4, label: "Valores Institucionales" },
+  ];
+
   return (
     <section className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-center text-slate-700 mb-4">
@@ -269,34 +275,44 @@ const QuienesSomos = () => {
               onSubmit={handleSubmit}
               className="bg-white shadow p-4 rounded"
             >
-              <div className="mb-4">
-                <label className="font-bold">Título Principal:</label>
+              <div className="mb-6">
+                <label className="font-bold block mb-2">Título Principal:</label>
                 <input
                   required
                   name="tituloPrincipal"
                   value={form.tituloPrincipal}
                   onChange={handleChange}
-                  className="w-full border p-2"
+                  className="w-full border p-2 rounded"
+                  style={{ backgroundColor: "#DBDBDB" }} // Added background color
+                  placeholder="TÍTULO"
                 />
               </div>
 
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="mb-4">
-                  <label className="font-bold">{`Subtítulo ${i}`}:</label>
+              {secciones.map(({ key, label }) => (
+                <div
+                  key={key}
+                  className="mb-6 p-4 border rounded-lg shadow-sm bg-gray-50"
+                >
+                  <label className="font-bold block mb-2 text-lg text-slate-700">
+                    {label}:
+                  </label>
                   <input
                     required
-                    name={`subtitulo${i}`}
-                    value={form[`subtitulo${i}`]}
+                    name={`subtitulo${key}`}
+                    value={form[`subtitulo${key}`]}
                     onChange={handleChange}
-                    className="w-full border p-2"
+                    className="w-full border p-2 mb-3 rounded"
+                    style={{ backgroundColor: "#DBDBDB" }} // Added background color
+                    placeholder="TÍTULO"
                   />
-                  <label className="font-bold mt-2">{`Contenido ${i}`}:</label>
                   <textarea
                     required
-                    name={`contenido${i}`}
-                    value={form[`contenido${i}`]}
+                    name={`contenido${key}`}
+                    value={form[`contenido${key}`]}
                     onChange={handleChange}
-                    className="w-full border p-2"
+                    className="w-full border p-3 rounded"
+                    style={{ backgroundColor: "#DBDBDB" }}
+                    placeholder="CONTENIDO"
                   />
                 </div>
               ))}
@@ -360,13 +376,14 @@ const QuienesSomos = () => {
                   accept="video/mp4,video/webm,video/x-matroska"
                   onChange={handleVideoChange}
                   className="w-full"
+                  style={{ backgroundColor: "#DBDBDB" }} // Added background color
                   disabled={isSubmitting}
                 />
               </div>
 
               <button
                 type="submit"
-                className={`bg-green-800 hover:bg-green-900 text-white px-4 py-2  ${
+                className={`bg-green-800 hover:bg-green-900 text-white px-4 py-2 ${
                   isSubmitting ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={isSubmitting}
@@ -376,28 +393,37 @@ const QuienesSomos = () => {
             </form>
           ) : data ? (
             <form className="bg-white shadow p-4 rounded">
-              <div className="mb-4">
-                <label className="font-bold">Título Principal:</label>
+              <div className="mb-6">
+                <label className="font-bold block mb-2">Título Principal:</label>
                 <input
                   value={data.tituloPrincipal}
                   readOnly
-                  className="w-full border p-2 bg-white cursor-default"
+                  className="w-full border p-2 rounded cursor-default"
+                  style={{ backgroundColor: "#DBDBDB" }} // Added background color
                 />
               </div>
 
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="mb-4">
-                  <label className="font-bold">{`Subtítulo ${i}:`}</label>
+              {secciones.map(({ key, label }) => (
+                <div
+                  key={key}
+                  className="mb-6 p-4 border rounded-lg shadow-sm bg-gray-50"
+                >
+                  <label className="font-bold block mb-2 text-lg text-slate-700">
+                    {label}:
+                  </label>
                   <input
-                    value={data[`subtitulo${i}`]}
+                    value={data[`subtitulo${key}`]}
                     readOnly
-                    className="w-full border p-2 bg-gray-100 cursor-default"
+                    className="w-full border p-2 mb-3 rounded cursor-default"
+                    style={{ backgroundColor: "#DBDBDB" }} // Added background color
+                    placeholder="TÍTULO"
                   />
-                  <label className="font-bold mt-2 block">{`Contenido ${i}:`}</label>
                   <textarea
-                    value={data[`contenido${i}`]}
+                    value={data[`contenido${key}`]}
                     readOnly
-                    className="w-full border p-2 bg-white cursor-default"
+                    className="w-full border p-3 rounded cursor-default"
+                    style={{ backgroundColor: "#DBDBDB" }}
+                    placeholder="CONTENIDO"
                   />
                 </div>
               ))}

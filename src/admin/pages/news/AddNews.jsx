@@ -6,11 +6,11 @@ import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../../hooks/useAuth';
+import Swal from 'sweetalert2';
 
 const modules = {
     toolbar: [
         [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
-        // [{ size: [] }],
         ['bold', 'italic', 'underline', 'strike', 'blockquote'],
         [{ 'list': 'ordered' }, { 'list': 'bullet' },
         { 'indent': '-1' }, { 'indent': '+1' }],
@@ -29,11 +29,9 @@ const formats = [
     "bullet",
     "indent",
     "link",
-
 ];
 
 const AddNews = () => {
-
     const naviagte = useNavigate();
     const [loading, setLoading] = useState(false);
     const [blog, setBlog] = useState({
@@ -42,9 +40,7 @@ const AddNews = () => {
         date: '',
     });
 
-
-    const [img, setImg] = useState([]);
-
+    const [img, setImg] = useState(null);
     const { token } = useAuth();
 
     const updateState = (e) => {
@@ -54,17 +50,44 @@ const AddNews = () => {
         })
     }
 
+    const validateImageAspectRatio = (file) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = () => {
+                const aspectRatio = img.width / img.height;
+                if (Math.abs(aspectRatio - 1.5) < 0.01) {
+                    resolve(true);
+                } else {
+                    reject(false);
+                }
+            };
+            img.onerror = () => reject(false);
+        });
+    };
+
     const addBlog = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        if (blog.title.trim() === '' || blog.description.trim() === '' || blog.date.trim() === '') {
+        if (blog.title.trim() === '' || blog.description.trim() === '' || blog.date.trim() === '' || !img) {
             setLoading(false);
             toast.error('Todos los campos son obligatorios');
             return;
         }
 
-
+        try {
+            // Validar formato de imagen 3:2
+            await validateImageAspectRatio(img);
+        } catch {
+            setLoading(false);
+            Swal.fire({
+                icon: 'error',
+                title: 'Formato de imagen incorrecto',
+                text: 'La imagen debe tener un formato 3:2',
+            });
+            return;
+        }
 
         try {
             const formData = new FormData();
@@ -80,31 +103,38 @@ const AddNews = () => {
                 }
             });
 
-
             setLoading(false);
 
             if (response.status === 200) {
-                toast.success('Noticia Agregada');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Noticia agregada',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 naviagte('/admin/news');
             }
 
         } catch (error) {
             console.log(error);
             setLoading(false);
-            toast.error('Error al agregar la noticia');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo agregar la noticia',
+            });
         }
     }
 
     return (
         <section className="container mx-auto">
-
             <h1 className="text-center text-3xl font-bold text-slate-600 mt-10">Agrega una Noticia</h1>
 
             <div className='p-3 max-w-5xl mx-auto min-h-screen '>
                 <form className='flex flex-col gap-4' onSubmit={addBlog}>
                     <div className='flex flex-col gap-4 justify-between'>
                         <div className='w-full'>
-                            <label htmlFor="text" className="font-semibold text-slate-700 pb-2">
+                            <label htmlFor="title" className="font-semibold text-slate-700 pb-2">
                                 Titulo:
                             </label>
                             <input
@@ -118,7 +148,7 @@ const AddNews = () => {
                             />
                         </div>
                         <div className='w-full'>
-                            <label htmlFor="text" className="font-semibold text-slate-700 pb-2">
+                            <label htmlFor="date" className="font-semibold text-slate-700 pb-2">
                                 Fecha:
                             </label>
                             <input
@@ -139,14 +169,19 @@ const AddNews = () => {
                                 type="file"
                                 name="img"
                                 id="img"
+                                accept="image/*"
                                 className='input-auth'
-                                placeholder="Ej. 23 de Enero del 2023"
                                 onChange={(e) => setImg(e.target.files[0])}
                             />
+
+                            {/* Rectángulo guía con proporción 3:2 */}
+                            <div className="mt-3 w-60 h-40 bg-gray-200 flex items-center justify-center border-2 border-dashed border-gray-400 rounded">
+                                <span className="text-gray-600 text-lg font-bold">3:2 🖼️</span>
+                            </div>
                         </div>
 
                         <div>
-                            <label htmlFor="email" className="font-semibold text-slate-700 pb-2">
+                            <label htmlFor="description" className="font-semibold text-slate-700 pb-2">
                                 Descripción:
                             </label>
                             <ReactQuill
@@ -159,7 +194,6 @@ const AddNews = () => {
                             />
                         </div>
 
-
                         {
                             loading ? <Spinner /> : (
                                 <button
@@ -171,12 +205,10 @@ const AddNews = () => {
                             )
                         }
                     </div>
-
                 </form>
             </div>
-
         </section>
     )
 }
 
-export default AddNews
+export default AddNews;

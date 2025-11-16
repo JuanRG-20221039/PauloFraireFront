@@ -60,27 +60,27 @@ const AddBeca = () => {
 
   return (
     <section className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
-      <h1 className="text-center text-3xl font-bold text-gray-700 mb-6">Crear Beca</h1>
+      <h1 className="text-center text-3xl font-bold text-slate-600 mb-6">Crear Beca</h1>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-gray-600 font-semibold">Título</label>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <label className="block text-slate-700 font-semibold">Título</label>
+          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="input-auth" />
         </div>
         <div>
-          <label className="block text-gray-600 font-semibold">Descripción</label>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          <label className="block text-slate-700 font-semibold">Descripción</label>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="input-auth"></textarea>
         </div>
         <div>
-          <label className="block text-gray-600 font-semibold">Requisitos</label>
-          <textarea value={requisitos} onChange={(e) => setRequisitos(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          <label className="block text-slate-700 font-semibold">Requisitos</label>
+          <textarea value={requisitos} onChange={(e) => setRequisitos(e.target.value)} className="input-auth"></textarea>
         </div>
         <div>
-          <label className="block text-gray-600 font-semibold">Imagen</label>
-          <input type="file" accept="image/*" onChange={handleImageChange} className="w-full p-2 border border-gray-300 rounded-lg" />
+          <label className="block text-slate-700 font-semibold">Imagen</label>
+          <input type="file" accept="image/*" onChange={handleImageChange} className="input-auth" />
         </div>
         <div>
-          <label className="block text-gray-600 font-semibold">PDFs</label>
-          <input type="file" accept=".pdf" multiple onChange={handlePdfChange} className="w-full p-2 border border-gray-300 rounded-lg" />
+          <label className="block text-slate-700 font-semibold">PDFs</label>
+          <input type="file" accept=".pdf" multiple onChange={handlePdfChange} className="input-auth" />
           <div className="mt-2 space-y-2">
             {pdfs.map((pdf, index) => (
               <div key={index} className="flex justify-between bg-gray-100 p-2 rounded-lg">
@@ -90,9 +90,7 @@ const AddBeca = () => {
             ))}
           </div>
         </div>
-        <button type="submit" className="w-full bg-blue-500 text-white p-3 rounded-lg font-semibold hover:bg-blue-600 transition disabled:opacity-50" disabled={isLoading}>
-          {isLoading ? "Enviando..." : "Guardar"}
-        </button>
+        <button type="submit" className="btn-action w-full" disabled={isLoading}>{isLoading ? "Enviando..." : "Guardar"}</button>
       </form>
     </section>
   );
