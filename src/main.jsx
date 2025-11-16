@@ -53,6 +53,7 @@ import EditStaff from "./admin/pages/organizacion/EditStaff.jsx";
 import Zonas from "./admin/pages/organizacion/zonas.jsx";
 // Configuración de la empresa
 import Empresa from "./admin/pages/Empresa/Configempresa.jsx";
+import Multimediainscripciones from "./admin/pages/multimediainscripciones/multimediainscripciones.jsx";
 
 // Contexto Contemporáneo
 import ContextContemporaneo from "./contexto-comtemporaneo/ContextContemporaneo.jsx";
@@ -136,6 +137,10 @@ const router = createBrowserRouter([
       { path: "/admin/add-staff", element: <CreateStaff /> },
       { path: "/admin/edit-staff/:id", element: <EditStaff /> },
       { path: "/admin/zonas", element: <Zonas /> },
+      {
+        path: "/admin/multimediainscripciones",
+        element: <Multimediainscripciones />,
+      },
 
       {
         path: "/admin/contexto-contemporaneo-admin",

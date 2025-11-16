@@ -9,6 +9,7 @@ import {
   FaLandmark,
   FaSitemap,
   FaUniversity,
+  FaPhotoVideo,
 } from "react-icons/fa";
 import { TiThMenuOutline } from "react-icons/ti";
 import { BiHomeAlt, BiSelectMultiple } from "react-icons/bi";
@@ -93,6 +94,11 @@ const adminNavItems = [
     to: "/admin/zonas",
     icon: <FaUniversity className="text-2xl" />,
     label: "Zonas",
+  },
+  {
+    to: "/admin/multimediainscripciones",
+    icon: <FaPhotoVideo className="text-2xl" />,
+    label: "multimedia en inscripciones",
   },
 ];
 
