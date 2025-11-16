@@ -27,7 +27,7 @@ const Inscripciones = () => {
   }, []);
 
   return (
-    <section className="max-w-[1300px] py-16 mx-auto my-20">
+    <section className="max-w-[1300px] mx-auto mt-5">
       <h4 className="bg-gradient-to-tr from-green-600 to-indigo-600 text-transparent bg-clip-text font-black text-center text-7xl leading-relaxed pt-4">
         {slogan}
       </h4>
