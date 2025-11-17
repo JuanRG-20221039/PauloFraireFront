@@ -61,6 +61,7 @@ import Politicas from "./admin/pages/about/Politicas.tsx";
 import ErrorPage404 from "./pages/error/ERROR404page.jsx"; // Página para errores 404
 import ErrorPage400 from "./pages/error/ERROR400page.jsx"; // Página para errores 400
 import ErrorPage500 from "./pages/error/ERROR500page.jsx"; // Página para errores 500
+import clientAxios from "./config/clientAxios.jsx";
 
 const router = createBrowserRouter([
   {
@@ -160,3 +161,15 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </ErrorProvider>
   </React.StrictMode>
 );
+
+// Precalentamiento ligero de datos clave para uso offline sin navegar
+if (typeof window !== "undefined" && navigator.onLine) {
+  (async () => {
+    try {
+      // Calienta el caché de Oferta Educativa (api-offer-dev)
+      await clientAxios.get("/getoffter");
+    } catch (_) {
+      // Silenciar errores de red; el precalentamiento es best-effort
+    }
+  })();
+}

@@ -75,13 +75,57 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Precarga rutas de SPA para acceso offline
+        additionalManifestEntries: [
+          { url: "/", revision: undefined },
+          { url: "/organization", revision: undefined },
+          { url: "/educational-offer", revision: undefined },
+          { url: "/calls", revision: undefined },
+          { url: "/academy-activities", revision: undefined },
+          { url: "/contexto-contemporaneo", revision: undefined },
+          { url: "/login", revision: undefined },
+        ],
         runtimeCaching: [
+          // Oferta Educativa: NetworkFirst (desarrollo)
           {
-            urlPattern: "https://paulofraireback-2.onrender.com/api/getoffter",
+            urlPattern: new RegExp(
+              "http://localhost:8000/api/(getoffter|getoffterid)"
+            ),
             handler: "NetworkFirst",
             options: {
-              cacheName: "Marvinxdxd",
-              expiration: { maxEntries: 50, maxAgeSeconds: 3600 },
+              cacheName: "api-offer-dev",
+              expiration: { maxEntries: 100, maxAgeSeconds: 86400 },
+              networkTimeoutSeconds: 3,
+            },
+          },
+          // General (Inicio, Convocatorias, Actividades, Análisis): StaleWhileRevalidate (desarrollo)
+          {
+            urlPattern: new RegExp(
+              "http://localhost:8000/api/(getbecas|institucional|customsize|slogan|introduction|academy-activities|blog/published|logo|header-title|social-links|contexto-contemporaneo|pdfs-cc|image-activity)"
+            ),
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "api-general-dev",
+              expiration: { maxEntries: 150, maxAgeSeconds: 86400 },
+            },
+          },
+
+          // Imágenes: CacheFirst
+          {
+            urlPattern: new RegExp("\\.(?:png|jpg|jpeg|gif|svg|webp)$"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "images-cache",
+              expiration: { maxEntries: 200, maxAgeSeconds: 604800 },
+            },
+          },
+          // PDFs: CacheFirst
+          {
+            urlPattern: new RegExp("\\.(?:pdf)$"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "pdf-cache",
+              expiration: { maxEntries: 50, maxAgeSeconds: 2592000 },
             },
           },
         ],
