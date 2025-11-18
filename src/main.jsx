@@ -162,14 +162,128 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   </React.StrictMode>
 );
 
-// Precalentamiento ligero de datos clave para uso offline sin navegar
-if (typeof window !== "undefined" && navigator.onLine) {
+if (typeof window !== "undefined") {
   (async () => {
     try {
-      // Calienta el caché de Oferta Educativa (api-offer-dev)
-      await clientAxios.get("/getoffter");
-    } catch (_) {
-      // Silenciar errores de red; el precalentamiento es best-effort
-    }
+      if ("serviceWorker" in navigator) {
+        try {
+          await navigator.serviceWorker.ready;
+          if (!navigator.serviceWorker.controller) {
+            await new Promise((resolve) => {
+              const onChange = () => {
+                navigator.serviceWorker.removeEventListener(
+                  "controllerchange",
+                  onChange
+                );
+                resolve();
+              };
+              navigator.serviceWorker.addEventListener(
+                "controllerchange",
+                onChange
+              );
+            });
+          }
+        } catch (_) {}
+      }
+
+      if (!navigator.onLine) return;
+      const endpoints = [
+        "/getoffter",
+        "/getbecas",
+        "/institucional",
+        "/customsize",
+        "/slogan",
+        "/introduction",
+        "/academy-activities",
+        "/blog/published",
+        "/logo",
+        "/header-title",
+        "/social-links",
+        "/contexto-contemporaneo",
+        "/pdfs-cc",
+        "/image-activity",
+        "/politicas/vigente",
+        "/Terminos/vigente",
+        "/deslindes/vigente",
+      ];
+      const responses = await Promise.allSettled(
+        endpoints.map((p) => clientAxios.get(p))
+      );
+
+      try {
+        await import("./components/home/Galery");
+      } catch (_) {}
+
+      const academyResp = responses.find(
+        (r, i) => i === endpoints.indexOf("/academy-activities")
+      );
+      if (academyResp && academyResp.status === "fulfilled") {
+        const list = Array.isArray(academyResp.value.data)
+          ? academyResp.value.data
+          : [];
+        const ids = list.slice(0, 8).map((a) => a._id).filter(Boolean);
+        await Promise.allSettled(
+          ids.map((id) => clientAxios.get(`/image-activity/${id}`))
+        );
+      }
+
+      const becasResp = responses.find(
+        (r, i) => i === endpoints.indexOf("/getbecas")
+      );
+      if (becasResp && becasResp.status === "fulfilled") {
+        const becas = Array.isArray(becasResp.value.data)
+          ? becasResp.value.data
+          : [];
+        for (const b of becas) {
+          if (b?.imageUrl) await fetchUrl(b.imageUrl);
+          if (Array.isArray(b?.pdfs)) {
+            for (const p of b.pdfs) {
+              if (p?.url) await fetchUrl(p.url);
+            }
+          }
+        }
+      }
+      const urlRegex = /(https?:\/\/[^\s]+\.(png|jpg|jpeg|gif|svg|webp|pdf|mp4|webm|ogg))$/i;
+      const fetchUrl = async (url) => {
+        try {
+          await fetch(url, { mode: "cors" });
+        } catch (_) {}
+      };
+      const scan = async (value) => {
+        if (!value) return;
+        if (typeof value === "string" && urlRegex.test(value)) {
+          await fetchUrl(value);
+        } else if (Array.isArray(value)) {
+          for (const v of value) await scan(v);
+        } else if (typeof value === "object") {
+          for (const k in value) await scan(value[k]);
+        }
+      };
+      for (const r of responses) {
+        if (r.status === "fulfilled") await scan(r.value.data);
+      }
+
+      const institucionalResp = responses.find(
+        (r, i) => i === endpoints.indexOf("/institucional")
+      );
+      if (institucionalResp && institucionalResp.status === "fulfilled") {
+        const contenido = institucionalResp.value?.data;
+        const videoUrl = contenido?.videoUrl;
+        if (videoUrl) await fetchUrl(videoUrl);
+      }
+
+      const offersResp = responses.find(
+        (r, i) => i === endpoints.indexOf("/getoffter")
+      );
+      if (offersResp && offersResp.status === "fulfilled") {
+        const list = Array.isArray(offersResp.value.data)
+          ? offersResp.value.data
+          : [];
+        const ids = list.slice(0, 6).map((o) => o._id).filter(Boolean);
+        await Promise.allSettled(
+          ids.map((id) => clientAxios.get(`/getoffterid/${id}`))
+        );
+      }
+    } catch (_) {}
   })();
 }

@@ -75,38 +75,45 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Precarga rutas de SPA para acceso offline
-        additionalManifestEntries: [
-          { url: "/", revision: undefined },
-          { url: "/organization", revision: undefined },
-          { url: "/educational-offer", revision: undefined },
-          { url: "/calls", revision: undefined },
-          { url: "/academy-activities", revision: undefined },
-          { url: "/contexto-contemporaneo", revision: undefined },
-          { url: "/login", revision: undefined },
+        clientsClaim: true,
+        skipWaiting: true,
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp}"],
+        maximumFileSizeToCacheInBytes: 30 * 1024 * 1024,
+        navigateFallback: "index.html",
+        navigateFallbackAllowlist: [
+          /^\/$/,
+          /^\/organization$/,
+          /^\/educational-offer$/,
+          /^\/calls$/,
+          /^\/academy-activities$/,
+          /^\/contexto-contemporaneo$/,
+          /^\/acercade$/,
+          /^\/login$/,
         ],
         runtimeCaching: [
           // Oferta Educativa: NetworkFirst (desarrollo)
           {
             urlPattern: new RegExp(
-              "http://localhost:8000/api/(getoffter|getoffterid)"
+              "https?:\\/\\/[^/]+\\/api\\/(getoffter|getoffterid)"
             ),
             handler: "NetworkFirst",
             options: {
               cacheName: "api-offer-dev",
               expiration: { maxEntries: 100, maxAgeSeconds: 86400 },
               networkTimeoutSeconds: 3,
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           // General (Inicio, Convocatorias, Actividades, Análisis): StaleWhileRevalidate (desarrollo)
           {
             urlPattern: new RegExp(
-              "http://localhost:8000/api/(getbecas|institucional|customsize|slogan|introduction|academy-activities|blog/published|logo|header-title|social-links|contexto-contemporaneo|pdfs-cc|image-activity)"
+              "https?:\\/\\/[^/]+\\/api\\/(getbecas|institucional|customsize|slogan|introduction|academy-activities|blog/published|logo|header-title|social-links|contexto-contemporaneo|pdfs-cc|image-activity|politicas\\/vigente|Terminos\\/vigente|deslindes\\/vigente)"
             ),
             handler: "StaleWhileRevalidate",
             options: {
               cacheName: "api-general-dev",
               expiration: { maxEntries: 150, maxAgeSeconds: 86400 },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
 
@@ -119,6 +126,16 @@ export default defineConfig({
               expiration: { maxEntries: 200, maxAgeSeconds: 604800 },
             },
           },
+          // JS y CSS dinámicos (chunks) : CacheFirst
+          {
+            urlPattern: new RegExp("/assets/.*\\.(?:js|css)$"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "assets-cache",
+              expiration: { maxEntries: 100, maxAgeSeconds: 604800 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           // PDFs: CacheFirst
           {
             urlPattern: new RegExp("\\.(?:pdf)$"),
@@ -126,6 +143,16 @@ export default defineConfig({
             options: {
               cacheName: "pdf-cache",
               expiration: { maxEntries: 50, maxAgeSeconds: 2592000 },
+            },
+          },
+          // Videos: CacheFirst
+          {
+            urlPattern: new RegExp("\\.(?:mp4|webm|ogg)$"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "video-cache",
+              expiration: { maxEntries: 30, maxAgeSeconds: 2592000 },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ],
