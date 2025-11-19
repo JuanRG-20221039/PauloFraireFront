@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "./index.css";
+import pdfAnniversary from "./assets/pdf/historico-aniversario-20.pdf";
 
 import Layout from "./Layout/Layout.jsx";
 import AuthProvider from "./context/AuthProvider.jsx";
@@ -185,6 +186,8 @@ if (typeof window !== "undefined") {
           }
         } catch (_) {}
       }
+
+      try { await fetch(pdfAnniversary); } catch (_) {}
 
       if (!navigator.onLine) return;
       const endpoints = [
