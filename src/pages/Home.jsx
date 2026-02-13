@@ -20,9 +20,9 @@ const Home = () => {
       <Hero />
       <Eventos />
       <Inscripciones />
-      <Anniversary />
-      <PromotionalVideo />
-      <DiplomadoInformation />
+      {/* <Anniversary /> */}
+      {/* <PromotionalVideo /> */}
+      {/* <DiplomadoInformation /> */}
       <Welcome />
       <News />
       {/* <Galery /> */}

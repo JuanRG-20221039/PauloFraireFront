@@ -7,6 +7,9 @@ import {
   FaBook,
   FaUsers,
   FaLandmark,
+  FaSitemap,
+  FaUniversity,
+  FaPhotoVideo,
 } from "react-icons/fa";
 import { TiThMenuOutline } from "react-icons/ti";
 import { BiHomeAlt, BiSelectMultiple } from "react-icons/bi";
@@ -17,21 +20,9 @@ import { TbLogin } from "react-icons/tb";
 import useAuth from "../../hooks/useAuth";
 
 const adminNavItems = [
-  {
-    to: "/admin/home",
-    icon: <BiHomeAlt className="text-2xl" />,
-    label: "Inicio",
-  },
-  {
-    to: "/admin/users",
-    icon: <SiGoogleclassroom className="text-2xl" />,
-    label: "Usuarios",
-  },
-  {
-    to: "/admin/news",
-    icon: <FaNewspaper className="text-2xl" />,
-    label: "Noticias",
-  },
+  { to: "/admin/home", icon: <BiHomeAlt className="text-2xl" />, label: "Inicio" },
+  { to: "/admin/users", icon: <SiGoogleclassroom className="text-2xl" />, label: "Usuarios" },
+  { to: "/admin/news", icon: <FaNewspaper className="text-2xl" />, label: "Noticias" },
   {
     to: "/admin/academy-activities",
     icon: <BiSelectMultiple className="text-2xl" />,
@@ -42,37 +33,35 @@ const adminNavItems = [
     icon: <GiThink className="text-2xl" />,
     label: "Contexto Contemporáneo",
   },
-  {
-    to: "/admin/ofertaeducativa",
-    icon: <SiInstructure className="text-2xl" />,
-    label: "Oferta Educativa",
-  },
-  {
-    to: "/admin/becas",
-    icon: <AiFillDollarCircle className="text-2xl" />,
-    label: "Becas",
-  },
-  {
-    to: "/admin/historiacultura",
-    icon: <FaLandmark className="text-2xl" />,
-    label: "Historia y Cultura",
-  },
-  {
-    to: "/admin/add-evento",
-    icon: <AiFillAlert className="text-2xl" />,
-    label: "Eventos",
-  },
-  {
-    to: "/admin/QuienesSomos",
-    icon: <FaUsers className="text-2xl" />,
-    label: "Quienes somos",
-  },
+  { to: "/admin/ofertaeducativa", icon: <SiInstructure className="text-2xl" />, label: "Oferta Educativa" },
+  { to: "/admin/becas", icon: <AiFillDollarCircle className="text-2xl" />, label: "Becas" },
+  { to: "/admin/historiacultura", icon: <FaLandmark className="text-2xl" />, label: "Historia y Cultura" },
+  { to: "/admin/add-evento", icon: <AiFillAlert className="text-2xl" />, label: "Eventos" },
+  { to: "/admin/QuienesSomos", icon: <FaUsers className="text-2xl" />, label: "Quienes somos" },
   {
     to: "/admin/configempresa",
     icon: <FaCog className="text-2xl" />,
     label: "Configuración datos de la empresa",
   },
+
+  // ➕ APORTES DE MARVINSH
   {
+    to: "/admin/organizacion",
+    icon: <FaSitemap className="text-2xl" />,
+    label: "Organización",
+  },
+  {
+    to: "/admin/zonas",
+    icon: <FaUniversity className="text-2xl" />,
+    label: "Zonas",
+  },
+  {
+    to: "/admin/multimediainscripciones",
+    icon: <FaPhotoVideo className="text-2xl" />,
+    label: "Multimedia en inscripciones",
+  },
+
+    {
     to: "/admin/about",
     icon: <FaBook className="text-2xl" />,
     label: "Acerca de",
@@ -92,23 +81,21 @@ const SideBar = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    // Obtener el rol del usuario desde localStorage
-    const userRole = localStorage.getItem("token") 
-      ? JSON.parse(localStorage.getItem("token")).role 
+    const userRole = localStorage.getItem("token")
+      ? JSON.parse(localStorage.getItem("token")).role
       : null;
-    
-    // Filtrar elementos del menú según el rol
-    if (userRole === 2) { // Si es editor
-      // Excluir los módulos de Usuarios, Configuración datos de la empresa, Quienes somos y About
-      const filtered = adminNavItems.filter(item => 
-        item.to !== "/admin/users" && 
-        item.to !== "/admin/configempresa" &&
-        item.to !== "/admin/QuienesSomos" &&
-        item.to !== "/admin/about"
+
+    if (userRole === 2) {
+      // Editor → quitar más módulos (TEST-FRONT + Marvinsh)
+      const filtered = adminNavItems.filter(
+        (item) =>
+          item.to !== "/admin/users" &&
+          item.to !== "/admin/configempresa" &&
+          item.to !== "/admin/QuienesSomos" &&
+          item.to !== "/admin/about"
       );
       setFilteredNavItems(filtered);
     } else {
-      // Para administradores y otros roles, mostrar todos los elementos
       setFilteredNavItems(adminNavItems);
     }
   }, []);
@@ -144,13 +131,10 @@ const SideBar = () => {
       </div>
 
       <ul className="pt-6">
-        <p
-          className={`text-gray-600 ${
-            !open && "hidden"
-          } text-sm text-center mb-2`}
-        >
+        <p className={`text-gray-600 ${!open && "hidden"} text-sm text-center mb-2`}>
           Menu
         </p>
+
         {filteredNavItems.map((item, index) => (
           <li key={index} className="space-y-2">
             {item.subItems ? (
@@ -164,11 +148,7 @@ const SideBar = () => {
                   to={item.to}
                 >
                   {item.icon}
-                  <span
-                    className={`${
-                      !open ? "hidden" : "block"
-                    } duration-200 flex-1`}
-                  >
+                  <span className={`${!open ? "hidden" : "block"} duration-200 flex-1`}>
                     {item.label}
                   </span>
                   {open && (
@@ -211,16 +191,12 @@ const SideBar = () => {
                     <NavLink
                       className={({ isActive }) =>
                         `flex items-center gap-2 ${
-                          isActive
-                            ? "bg-yellow-400 text-black"
-                            : "text-[#413f44]"
+                          isActive ? "bg-yellow-400 text-black" : "text-[#413f44]"
                         } duration-150 rounded-md p-2 cursor-pointer hover:bg-Teal hover:text-white font-bold text-sm`
                       }
                       to={subItem.to}
                     >
-                      <span
-                        className={`${!open ? "hidden" : "block"} duration-200`}
-                      >
+                      <span className={`${!open ? "hidden" : "block"} duration-200`}>
                         {subItem.label}
                       </span>
                     </NavLink>
@@ -231,7 +207,6 @@ const SideBar = () => {
           </li>
         ))}
 
-        {/* Cerrar sesión */}
         <li className="space-y-2">
           <button
             className="flex items-center gap-2 bg-red-500 text-white hover:bg-red-600 duration-150 rounded-md p-2 cursor-pointer font-bold text-sm"

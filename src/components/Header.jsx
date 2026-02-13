@@ -12,7 +12,7 @@ const Header = () => {
   const [active, setActive] = useState(true);
   const [logo, setLogo] = useState("");
   const [title, setTitle] = useState(
-    "Sin título..."
+    "CENTRO REGIONAL DE EDUCACIÓN SUPERIOR PAULO FREIRE"// estatico, revisar por que no se actualiza
   ); // Estado para el título dinámico con valor por defecto
 
   useEffect(() => {
